@@ -43,10 +43,10 @@ export default {
         mono: ['"JetBrains Mono"', '"Fira Code"', 'monospace'],
       },
       boxShadow: {
-        'card': '0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06)',
-        'card-hover': '0 10px 25px -5px rgba(0,0,0,0.08), 0 4px 10px -5px rgba(0,0,0,0.04)',
-        'card-dark': '0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2)',
-        'card-dark-hover': '0 10px 25px -5px rgba(0,0,0,0.4), 0 4px 10px -5px rgba(0,0,0,0.3)',
+        'card': '0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06)',
+        'card-hover': '0 12px 28px -5px rgba(0,0,0,0.12), 0 6px 12px -5px rgba(0,0,0,0.06)',
+        'card-dark': '0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3)',
+        'card-dark-hover': '0 12px 28px -5px rgba(0,0,0,0.5), 0 6px 12px -5px rgba(0,0,0,0.3)',
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-out',

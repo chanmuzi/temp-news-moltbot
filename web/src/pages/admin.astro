@@ -12,28 +12,28 @@ const currentWeek = Math.ceil(now.getDate() / 7).toString();
   <section class="max-w-3xl mx-auto">
     <!-- Header -->
     <div class="flex items-center gap-3 mb-6">
-      <a href={import.meta.env.BASE_URL} class="text-sand-400 hover:text-claude-500 transition-colors text-sm">
+      <a href={`${import.meta.env.BASE_URL}`} class="text-gray-400 hover:text-claude-500 transition-colors text-sm">
         <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
         홈
       </a>
     </div>
 
     <div class="mb-6">
-      <h1 class="text-2xl font-bold text-sand-800 dark:text-sand-100 mb-1">새 항목 추가</h1>
-      <p class="text-sm text-sand-500 dark:text-sand-500">
+      <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">새 항목 추가</h1>
+      <p class="text-sm text-gray-500 dark:text-gray-400">
         마크다운을 붙여넣으면 자동으로 파싱됩니다.
       </p>
     </div>
 
     <!-- GitHub Token Setup (collapsible) -->
     <div class="mb-6">
-      <button id="toggle-settings" class="flex items-center gap-2 text-sm text-sand-400 hover:text-claude-500 transition-colors">
+      <button id="toggle-settings" class="flex items-center gap-2 text-sm text-gray-400 hover:text-claude-500 transition-colors">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
         GitHub 연결 설정
         <span id="token-status" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs"></span>
       </button>
-      <div id="settings-panel" class="hidden mt-3 p-4 bg-white dark:bg-anthro-darkSurface rounded-xl border border-sand-200 dark:border-sand-800">
-        <p class="text-xs text-sand-500 dark:text-sand-500 mb-3">
+      <div id="settings-panel" class="hidden mt-3 p-4 bg-white dark:bg-anthro-darkSurface rounded-xl border border-gray-200 dark:border-gray-800">
+        <p class="text-xs text-gray-500 dark:text-gray-500 mb-3">
           GitHub Personal Access Token을 입력하면 브라우저에서 직접 항목을 추가할 수 있습니다.<br/>
           토큰은 브라우저 localStorage에만 저장되며 외부로 전송되지 않습니다 (GitHub API 제외).
         </p>
@@ -42,47 +42,47 @@ const currentWeek = Math.ceil(now.getDate() / 7).toString();
             type="password"
             id="github-token"
             placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
-            class="flex-1 px-3 py-2 rounded-lg border border-sand-200 dark:border-sand-700 bg-sand-50 dark:bg-anthro-darkMid text-sm text-sand-800 dark:text-sand-100 outline-none focus:border-claude-500 transition-all font-mono"
+            class="flex-1 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-anthro-darkMid text-sm text-gray-900 dark:text-gray-100 outline-none focus:border-claude-500 transition-all font-mono"
           />
           <button id="save-token" class="px-4 py-2 rounded-lg bg-claude-500 text-white text-sm font-medium hover:bg-claude-600 transition-all">
             저장
           </button>
-          <button id="clear-token" class="px-3 py-2 rounded-lg border border-sand-200 dark:border-sand-700 text-sm text-sand-500 hover:text-red-500 hover:border-red-300 transition-all">
+          <button id="clear-token" class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-sm text-gray-500 hover:text-red-500 hover:border-red-300 transition-all">
             삭제
           </button>
         </div>
         <div class="mt-3">
-          <label class="block text-xs text-sand-500 mb-1">Repository (owner/repo)</label>
+          <label class="block text-xs text-gray-500 mb-1">Repository (owner/repo)</label>
           <input
             type="text"
             id="github-repo"
             value="chanmuzi/temp-news-moltbot"
-            class="w-full px-3 py-2 rounded-lg border border-sand-200 dark:border-sand-700 bg-sand-50 dark:bg-anthro-darkMid text-sm text-sand-800 dark:text-sand-100 outline-none focus:border-claude-500 transition-all font-mono"
+            class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-anthro-darkMid text-sm text-gray-900 dark:text-gray-100 outline-none focus:border-claude-500 transition-all font-mono"
           />
         </div>
       </div>
     </div>
 
     <!-- Markdown Input -->
-    <div class="bg-white dark:bg-anthro-darkSurface rounded-xl border border-sand-200 dark:border-sand-800 p-5 mb-6">
-      <h2 class="text-sm font-semibold text-sand-500 dark:text-sand-500 uppercase tracking-wider mb-4">마크다운 입력</h2>
+    <div class="bg-white dark:bg-anthro-darkSurface rounded-xl border border-gray-200 dark:border-gray-800 p-5 mb-6">
+      <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-500 uppercase tracking-wider mb-4">마크다운 입력</h2>
 
       <!-- Date inputs -->
       <div class="flex gap-3 mb-4">
         <div>
-          <label class="block text-xs text-sand-400 mb-1">년</label>
+          <label class="block text-xs text-gray-400 mb-1">년</label>
           <input type="number" id="input-year" value={currentYear} min="2020" max="2030"
-            class="w-20 px-3 py-2 rounded-lg border border-sand-200 dark:border-sand-700 bg-sand-50 dark:bg-anthro-darkMid text-sm text-sand-800 dark:text-sand-100 outline-none focus:border-claude-500 transition-all font-mono" />
+            class="w-20 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-anthro-darkMid text-sm text-gray-900 dark:text-gray-100 outline-none focus:border-claude-500 transition-all font-mono" />
         </div>
         <div>
-          <label class="block text-xs text-sand-400 mb-1">월</label>
+          <label class="block text-xs text-gray-400 mb-1">월</label>
           <input type="number" id="input-month" value={currentMonth} min="1" max="12"
-            class="w-16 px-3 py-2 rounded-lg border border-sand-200 dark:border-sand-700 bg-sand-50 dark:bg-anthro-darkMid text-sm text-sand-800 dark:text-sand-100 outline-none focus:border-claude-500 transition-all font-mono" />
+            class="w-16 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-anthro-darkMid text-sm text-gray-900 dark:text-gray-100 outline-none focus:border-claude-500 transition-all font-mono" />
         </div>
         <div>
-          <label class="block text-xs text-sand-400 mb-1">주차</label>
+          <label class="block text-xs text-gray-400 mb-1">주차</label>
           <input type="number" id="input-week" value={currentWeek} min="1" max="5"
-            class="w-16 px-3 py-2 rounded-lg border border-sand-200 dark:border-sand-700 bg-sand-50 dark:bg-anthro-darkMid text-sm text-sand-800 dark:text-sand-100 outline-none focus:border-claude-500 transition-all font-mono" />
+            class="w-16 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-anthro-darkMid text-sm text-gray-900 dark:text-gray-100 outline-none focus:border-claude-500 transition-all font-mono" />
         </div>
       </div>
 
@@ -92,14 +92,14 @@ const currentWeek = Math.ceil(now.getDate() / 7).toString();
         placeholder="- 📜 [Anthropic, Stanford] [**Shaping capabilities with token-level data filtering**](https://arxiv.org/abs/2601.21571)
     - 언어 모델의 undesired capabilities를 줄이는 대부분의 방식은 post hoc 스타일임을 문제점으로 지적
         - → 대신 pretraining 동안에 해결되어야 하는 것으로 대안 제시"
-        class="w-full px-4 py-3 rounded-xl border border-sand-200 dark:border-sand-700 bg-sand-50 dark:bg-anthro-darkMid text-sm text-sand-800 dark:text-sand-100 placeholder-sand-400 dark:placeholder-sand-600 outline-none focus:border-claude-500 transition-all font-mono leading-relaxed"
+        class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-anthro-darkMid text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 outline-none focus:border-claude-500 transition-all font-mono leading-relaxed"
       ></textarea>
 
       <div class="mt-4 flex gap-2">
         <button id="parse-btn" class="px-5 py-2.5 bg-claude-500 text-white rounded-lg text-sm font-medium hover:bg-claude-600 transition-all shadow-sm">
           파싱 미리보기
         </button>
-        <button id="clear-btn" class="px-4 py-2.5 rounded-lg border border-sand-200 dark:border-sand-700 text-sm text-sand-500 hover:text-sand-700 dark:hover:text-sand-300 transition-all">
+        <button id="clear-btn" class="px-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-all">
           지우기
         </button>
       </div>
@@ -107,7 +107,7 @@ const currentWeek = Math.ceil(now.getDate() / 7).toString();
 
     <!-- Preview -->
     <div id="preview-section" class="hidden mb-6">
-      <h2 class="text-sm font-semibold text-sand-500 dark:text-sand-500 uppercase tracking-wider mb-3">미리보기</h2>
+      <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-500 uppercase tracking-wider mb-3">미리보기</h2>
       <div id="preview-container" class="space-y-3"></div>
 
       <!-- Actions -->
@@ -116,7 +116,7 @@ const currentWeek = Math.ceil(now.getDate() / 7).toString();
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
           GitHub에 추가
         </button>
-        <button id="copy-json" class="px-4 py-2.5 rounded-lg border border-sand-200 dark:border-sand-700 text-sm text-sand-500 hover:text-sand-700 dark:hover:text-sand-300 transition-all">
+        <button id="copy-json" class="px-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-all">
           JSON 복사
         </button>
       </div>
@@ -126,26 +126,26 @@ const currentWeek = Math.ceil(now.getDate() / 7).toString();
 
       <!-- JSON output (collapsible) -->
       <details class="mt-4">
-        <summary class="text-xs text-sand-400 cursor-pointer hover:text-sand-600 transition-colors">JSON 출력 보기</summary>
+        <summary class="text-xs text-gray-400 cursor-pointer hover:text-gray-600 transition-colors">JSON 출력 보기</summary>
         <pre id="json-output" class="mt-2 bg-anthro-dark text-claude-300 p-4 rounded-lg overflow-x-auto text-xs font-mono"></pre>
       </details>
     </div>
 
     <!-- Format Guide -->
     <details class="mb-8">
-      <summary class="text-sm font-medium text-sand-400 cursor-pointer hover:text-claude-500 transition-colors">지원 형식 안내</summary>
-      <div class="mt-3 p-4 bg-white dark:bg-anthro-darkSurface rounded-xl border border-sand-200 dark:border-sand-800 space-y-3 text-sm">
+      <summary class="text-sm font-medium text-gray-400 cursor-pointer hover:text-claude-500 transition-colors">지원 형식 안내</summary>
+      <div class="mt-3 p-4 bg-white dark:bg-anthro-darkSurface rounded-xl border border-gray-200 dark:border-gray-800 space-y-3 text-sm">
         <div>
           <h3 class="font-medium text-blue-600 dark:text-blue-400 mb-1">📜 Paper</h3>
-          <code class="block bg-sand-50 dark:bg-anthro-darkMid p-2 rounded-lg text-xs font-mono text-sand-600 dark:text-sand-400 overflow-x-auto">- 📜 [기관명] [**논문 제목**](https://arxiv.org/abs/...)<br/>    - 설명 1<br/>        - 하위 설명</code>
+          <code class="block bg-gray-50 dark:bg-anthro-darkMid p-2 rounded-lg text-xs font-mono text-gray-600 dark:text-gray-400 overflow-x-auto">- 📜 [기관명] [**논문 제목**](https://arxiv.org/abs/...)<br/>    - 설명 1<br/>        - 하위 설명</code>
         </div>
         <div>
           <h3 class="font-medium text-emerald-600 dark:text-emerald-400 mb-1">🧑🏻‍💻 Dev</h3>
-          <code class="block bg-sand-50 dark:bg-anthro-darkMid p-2 rounded-lg text-xs font-mono text-sand-600 dark:text-sand-400 overflow-x-auto">- 🧑🏻‍💻 [기관명] [제목](URL)<br/>    - 설명</code>
+          <code class="block bg-gray-50 dark:bg-anthro-darkMid p-2 rounded-lg text-xs font-mono text-gray-600 dark:text-gray-400 overflow-x-auto">- 🧑🏻‍💻 [기관명] [제목](URL)<br/>    - 설명</code>
         </div>
         <div>
           <h3 class="font-medium text-violet-600 dark:text-violet-400 mb-1">🗞️ News</h3>
-          <code class="block bg-sand-50 dark:bg-anthro-darkMid p-2 rounded-lg text-xs font-mono text-sand-600 dark:text-sand-400 overflow-x-auto">- 🗞️ [기관명] [제목](URL)<br/>    - 설명</code>
+          <code class="block bg-gray-50 dark:bg-anthro-darkMid p-2 rounded-lg text-xs font-mono text-gray-600 dark:text-gray-400 overflow-x-auto">- 🗞️ [기관명] [제목](URL)<br/>    - 설명</code>
         </div>
       </div>
     </details>
@@ -255,16 +255,16 @@ const currentWeek = Math.ceil(now.getDate() / 7).toString();
         <div class="p-4 rounded-xl border ${info.bg}">
           <div class="flex items-center gap-2 mb-2">
             <span class="text-xs font-semibold ${info.color}">${info.icon} ${item.type.toUpperCase()}</span>
-            <span class="text-sm font-medium text-sand-600 dark:text-sand-400">${item.org}</span>
-            <span class="text-xs text-sand-400 font-mono ml-auto">${item.date}</span>
+            <span class="text-sm font-medium text-gray-600 dark:text-gray-400">${item.org}</span>
+            <span class="text-xs text-gray-400 font-mono ml-auto">${item.date}</span>
           </div>
-          <h3 class="font-semibold text-sand-800 dark:text-sand-100 mb-2">${item.title}</h3>
+          <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-2">${item.title}</h3>
           ${item.url ? `<a href="${item.url}" target="_blank" class="text-xs text-claude-500 hover:underline mb-2 block truncate">${item.url}</a>` : ''}
           ${item.bullets.length > 0 ? `
-            <ul class="text-sm text-sand-600 dark:text-sand-400 space-y-1">
+            <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
               ${item.bullets.map((b: any) => `
-                <li class="${b.level > 1 ? 'ml-4 text-xs text-sand-500' : ''} flex items-start gap-2">
-                  <span class="mt-[7px] w-1 h-1 rounded-full bg-sand-400 flex-shrink-0"></span>
+                <li class="${b.level > 1 ? 'ml-4 text-xs text-gray-500' : ''} flex items-start gap-2">
+                  <span class="mt-[7px] w-1 h-1 rounded-full bg-gray-400 flex-shrink-0"></span>
                   <span>${b.text}</span>
                 </li>
               `).join('')}
@@ -384,7 +384,7 @@ const currentWeek = Math.ceil(now.getDate() / 7).toString();
         statusEl.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400';
       } else {
         statusEl.textContent = '미연결';
-        statusEl.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-sand-100 dark:bg-sand-800 text-sand-400';
+        statusEl.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-gray-100 dark:bg-gray-800 text-gray-400';
       }
     }
   }

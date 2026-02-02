@@ -8,24 +8,20 @@
   }
 
   body {
-    @apply bg-anthro-bg text-sand-900;
+    @apply bg-anthro-bg text-gray-800;
   }
 
   .dark body,
   body.dark {
     background-color: #1A1915;
-    color: #F5F4F0;
+    color: #E8E6E0;
   }
 
   :root {
     --claude-500: #D97757;
     --claude-600: #C4623F;
-    --sand-100: #F5F4F0;
-    --sand-200: #ECEAE3;
-    --sand-300: #DDD9CE;
   }
 
-  /* Custom scrollbar */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -45,22 +41,35 @@
 }
 
 @layer components {
-  /* Search highlight */
   mark.search-highlight {
-    @apply bg-claude-100 dark:bg-claude-800 text-inherit rounded-sm px-0.5;
+    background-color: #FBBF24;
+    color: #1a1a1a;
+    border-radius: 2px;
+    padding: 0 2px;
     text-decoration: none;
+    font-weight: 600;
   }
 
-  /* Button press effect */
+  .dark mark.search-highlight {
+    background-color: #D97757;
+    color: #fff;
+  }
+
   button:active:not(:disabled) {
     transform: scale(0.98);
   }
 
-  /* Toast notification */
   .toast {
-    @apply fixed bottom-6 left-1/2 -translate-x-1/2 px-5 py-3 rounded-xl text-sm font-medium z-[100] shadow-lg;
-    @apply bg-sand-900 dark:bg-sand-100 text-white dark:text-sand-900;
+    @apply fixed bottom-6 left-1/2 -translate-x-1/2 px-5 py-3 rounded-xl text-sm font-medium z-[100];
+    background: #302E28;
+    color: #fff;
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2);
     animation: toastIn 0.3s ease-out, toastOut 0.3s ease-in 2.7s;
+  }
+
+  .dark .toast {
+    background: #F5F4F0;
+    color: #302E28;
   }
 
   @keyframes toastIn {
@@ -80,7 +89,10 @@
   }
 }
 
-/* Selection color */
 ::selection {
-  @apply bg-claude-100 dark:bg-claude-900;
+  background: #FFD9B8;
+}
+
+.dark ::selection {
+  background: #7D3A24;
 }
