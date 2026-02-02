@@ -9,111 +9,146 @@ const currentWeek = Math.ceil(now.getDate() / 7).toString();
 ---
 
 <Layout title="항목 추가 - NLP Paper News">
-  <section class="max-w-4xl mx-auto">
-    <div class="mb-8">
-      <h1 class="text-3xl font-bold mb-2">✏️ 새 항목 추가</h1>
-      <p class="text-gray-600 dark:text-gray-400">
-        기존 마크다운 형식을 그대로 붙여넣으면 자동으로 파싱됩니다.
+  <section class="max-w-3xl mx-auto">
+    <!-- Header -->
+    <div class="flex items-center gap-3 mb-6">
+      <a href={import.meta.env.BASE_URL} class="text-sand-400 hover:text-claude-500 transition-colors text-sm">
+        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        홈
+      </a>
+    </div>
+
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold text-sand-800 dark:text-sand-100 mb-1">새 항목 추가</h1>
+      <p class="text-sm text-sand-500 dark:text-sand-500">
+        마크다운을 붙여넣으면 자동으로 파싱됩니다.
       </p>
     </div>
 
-    <!-- Markdown Input -->
-    <div class="card bg-white dark:bg-gray-900 rounded-2xl border-2 border-gray-200 dark:border-gray-800 p-6 mb-8">
-      <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
-        📝 마크다운 입력
-        <span class="text-sm font-normal text-gray-500">(여러 항목 동시 입력 가능)</span>
-      </h2>
-      
-      <div class="mb-4">
-        <label class="block text-sm font-medium mb-2">날짜 정보</label>
-        <div class="flex gap-3">
-          <div>
-            <input type="number" id="input-year" value={currentYear} min="2020" max="2030" 
-              class="w-24 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800" />
-            <span class="text-sm text-gray-500 ml-1">년</span>
-          </div>
-          <div>
-            <input type="number" id="input-month" value={currentMonth} min="1" max="12"
-              class="w-20 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800" />
-            <span class="text-sm text-gray-500 ml-1">월</span>
-          </div>
-          <div>
-            <input type="number" id="input-week" value={currentWeek} min="1" max="5"
-              class="w-20 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800" />
-            <span class="text-sm text-gray-500 ml-1">주차</span>
-          </div>
+    <!-- GitHub Token Setup (collapsible) -->
+    <div class="mb-6">
+      <button id="toggle-settings" class="flex items-center gap-2 text-sm text-sand-400 hover:text-claude-500 transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        GitHub 연결 설정
+        <span id="token-status" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs"></span>
+      </button>
+      <div id="settings-panel" class="hidden mt-3 p-4 bg-white dark:bg-anthro-darkSurface rounded-xl border border-sand-200 dark:border-sand-800">
+        <p class="text-xs text-sand-500 dark:text-sand-500 mb-3">
+          GitHub Personal Access Token을 입력하면 브라우저에서 직접 항목을 추가할 수 있습니다.<br/>
+          토큰은 브라우저 localStorage에만 저장되며 외부로 전송되지 않습니다 (GitHub API 제외).
+        </p>
+        <div class="flex gap-2">
+          <input
+            type="password"
+            id="github-token"
+            placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+            class="flex-1 px-3 py-2 rounded-lg border border-sand-200 dark:border-sand-700 bg-sand-50 dark:bg-anthro-darkMid text-sm text-sand-800 dark:text-sand-100 outline-none focus:border-claude-500 transition-all font-mono"
+          />
+          <button id="save-token" class="px-4 py-2 rounded-lg bg-claude-500 text-white text-sm font-medium hover:bg-claude-600 transition-all">
+            저장
+          </button>
+          <button id="clear-token" class="px-3 py-2 rounded-lg border border-sand-200 dark:border-sand-700 text-sm text-sand-500 hover:text-red-500 hover:border-red-300 transition-all">
+            삭제
+          </button>
+        </div>
+        <div class="mt-3">
+          <label class="block text-xs text-sand-500 mb-1">Repository (owner/repo)</label>
+          <input
+            type="text"
+            id="github-repo"
+            value="chanmuzi/temp-news-moltbot"
+            class="w-full px-3 py-2 rounded-lg border border-sand-200 dark:border-sand-700 bg-sand-50 dark:bg-anthro-darkMid text-sm text-sand-800 dark:text-sand-100 outline-none focus:border-claude-500 transition-all font-mono"
+          />
         </div>
       </div>
-      
-      <textarea 
+    </div>
+
+    <!-- Markdown Input -->
+    <div class="bg-white dark:bg-anthro-darkSurface rounded-xl border border-sand-200 dark:border-sand-800 p-5 mb-6">
+      <h2 class="text-sm font-semibold text-sand-500 dark:text-sand-500 uppercase tracking-wider mb-4">마크다운 입력</h2>
+
+      <!-- Date inputs -->
+      <div class="flex gap-3 mb-4">
+        <div>
+          <label class="block text-xs text-sand-400 mb-1">년</label>
+          <input type="number" id="input-year" value={currentYear} min="2020" max="2030"
+            class="w-20 px-3 py-2 rounded-lg border border-sand-200 dark:border-sand-700 bg-sand-50 dark:bg-anthro-darkMid text-sm text-sand-800 dark:text-sand-100 outline-none focus:border-claude-500 transition-all font-mono" />
+        </div>
+        <div>
+          <label class="block text-xs text-sand-400 mb-1">월</label>
+          <input type="number" id="input-month" value={currentMonth} min="1" max="12"
+            class="w-16 px-3 py-2 rounded-lg border border-sand-200 dark:border-sand-700 bg-sand-50 dark:bg-anthro-darkMid text-sm text-sand-800 dark:text-sand-100 outline-none focus:border-claude-500 transition-all font-mono" />
+        </div>
+        <div>
+          <label class="block text-xs text-sand-400 mb-1">주차</label>
+          <input type="number" id="input-week" value={currentWeek} min="1" max="5"
+            class="w-16 px-3 py-2 rounded-lg border border-sand-200 dark:border-sand-700 bg-sand-50 dark:bg-anthro-darkMid text-sm text-sand-800 dark:text-sand-100 outline-none focus:border-claude-500 transition-all font-mono" />
+        </div>
+      </div>
+
+      <textarea
         id="markdown-input"
-        rows="12"
+        rows="10"
         placeholder="- 📜 [Anthropic, Stanford] [**Shaping capabilities with token-level data filtering**](https://arxiv.org/abs/2601.21571)
     - 언어 모델의 undesired capabilities를 줄이는 대부분의 방식은 post hoc 스타일임을 문제점으로 지적
-        - → 대신 pretraining 동안에 해결되어야 하는 것으로 대안 제시
-    - 의료 도메인을 대상으로 documents filtering보다 tokens filtering이 훨씬 더 효과적이었음을 입증
-
-- 🧑🏻‍💻 [OpenAI] [Introducing GPT-5.2](https://openai.com/index/introducing-gpt-5-2/)
-    - ChatGPT - Instant/Thinking/Pro, API - 5.2/5.2-chat-latest/5.2-pro"
-        class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:border-indigo-500 dark:focus:border-indigo-400 outline-none transition-all font-mono text-sm"
+        - → 대신 pretraining 동안에 해결되어야 하는 것으로 대안 제시"
+        class="w-full px-4 py-3 rounded-xl border border-sand-200 dark:border-sand-700 bg-sand-50 dark:bg-anthro-darkMid text-sm text-sand-800 dark:text-sand-100 placeholder-sand-400 dark:placeholder-sand-600 outline-none focus:border-claude-500 transition-all font-mono leading-relaxed"
       ></textarea>
-      
-      <div class="mt-4 flex gap-3">
-        <button id="parse-btn" class="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-bold hover:shadow-lg hover:shadow-indigo-500/25 transition-all">
-          🔍 파싱 미리보기
+
+      <div class="mt-4 flex gap-2">
+        <button id="parse-btn" class="px-5 py-2.5 bg-claude-500 text-white rounded-lg text-sm font-medium hover:bg-claude-600 transition-all shadow-sm">
+          파싱 미리보기
         </button>
-        <button id="clear-btn" class="px-6 py-3 bg-gray-100 dark:bg-gray-800 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-all">
+        <button id="clear-btn" class="px-4 py-2.5 rounded-lg border border-sand-200 dark:border-sand-700 text-sm text-sand-500 hover:text-sand-700 dark:hover:text-sand-300 transition-all">
           지우기
         </button>
       </div>
     </div>
 
     <!-- Preview -->
-    <div id="preview-section" class="hidden mb-8">
-      <h2 class="text-xl font-bold mb-4">👀 미리보기</h2>
-      <div id="preview-container" class="space-y-4"></div>
-      
-      <div class="mt-6 p-4 bg-amber-50 dark:bg-amber-950/30 rounded-xl border border-amber-200 dark:border-amber-800">
-        <h3 class="font-bold text-amber-800 dark:text-amber-200 mb-2">📋 JSON 출력</h3>
-        <p class="text-sm text-amber-700 dark:text-amber-300 mb-3">
-          아래 JSON을 복사하여 <code class="bg-amber-100 dark:bg-amber-900 px-1 rounded">data/items.json</code>의 items 배열 맨 앞에 추가하세요.
-        </p>
-        <pre id="json-output" class="bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto text-xs"></pre>
-        <button id="copy-json" class="mt-3 px-4 py-2 bg-amber-600 text-white rounded-lg font-medium hover:bg-amber-700 transition-all">
-          📋 JSON 복사
+    <div id="preview-section" class="hidden mb-6">
+      <h2 class="text-sm font-semibold text-sand-500 dark:text-sand-500 uppercase tracking-wider mb-3">미리보기</h2>
+      <div id="preview-container" class="space-y-3"></div>
+
+      <!-- Actions -->
+      <div class="mt-6 flex gap-2">
+        <button id="submit-btn" class="px-5 py-2.5 bg-claude-500 text-white rounded-lg text-sm font-medium hover:bg-claude-600 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          GitHub에 추가
+        </button>
+        <button id="copy-json" class="px-4 py-2.5 rounded-lg border border-sand-200 dark:border-sand-700 text-sm text-sand-500 hover:text-sand-700 dark:hover:text-sand-300 transition-all">
+          JSON 복사
         </button>
       </div>
+
+      <!-- Submit status -->
+      <div id="submit-status" class="hidden mt-4 p-4 rounded-xl text-sm"></div>
+
+      <!-- JSON output (collapsible) -->
+      <details class="mt-4">
+        <summary class="text-xs text-sand-400 cursor-pointer hover:text-sand-600 transition-colors">JSON 출력 보기</summary>
+        <pre id="json-output" class="mt-2 bg-anthro-dark text-claude-300 p-4 rounded-lg overflow-x-auto text-xs font-mono"></pre>
+      </details>
     </div>
 
     <!-- Format Guide -->
-    <div class="card bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-200 dark:border-gray-800 p-6">
-      <h2 class="text-lg font-bold mb-4">📖 지원 형식</h2>
-      <div class="space-y-4 text-sm">
+    <details class="mb-8">
+      <summary class="text-sm font-medium text-sand-400 cursor-pointer hover:text-claude-500 transition-colors">지원 형식 안내</summary>
+      <div class="mt-3 p-4 bg-white dark:bg-anthro-darkSurface rounded-xl border border-sand-200 dark:border-sand-800 space-y-3 text-sm">
         <div>
-          <h3 class="font-semibold text-indigo-600 dark:text-indigo-400 mb-1">📜 Paper</h3>
-          <code class="block bg-gray-100 dark:bg-gray-800 p-3 rounded-lg text-xs overflow-x-auto">
-- 📜 [기관명] [**논문 제목**](https://arxiv.org/abs/...)
-    - 설명 1
-    - 설명 2
-        - 하위 설명
-          </code>
+          <h3 class="font-medium text-blue-600 dark:text-blue-400 mb-1">📜 Paper</h3>
+          <code class="block bg-sand-50 dark:bg-anthro-darkMid p-2 rounded-lg text-xs font-mono text-sand-600 dark:text-sand-400 overflow-x-auto">- 📜 [기관명] [**논문 제목**](https://arxiv.org/abs/...)<br/>    - 설명 1<br/>        - 하위 설명</code>
         </div>
         <div>
-          <h3 class="font-semibold text-green-600 dark:text-green-400 mb-1">🧑🏻‍💻 Dev</h3>
-          <code class="block bg-gray-100 dark:bg-gray-800 p-3 rounded-lg text-xs overflow-x-auto">
-- 🧑🏻‍💻 [기관명] [제목](URL)
-    - 설명
-          </code>
+          <h3 class="font-medium text-emerald-600 dark:text-emerald-400 mb-1">🧑🏻‍💻 Dev</h3>
+          <code class="block bg-sand-50 dark:bg-anthro-darkMid p-2 rounded-lg text-xs font-mono text-sand-600 dark:text-sand-400 overflow-x-auto">- 🧑🏻‍💻 [기관명] [제목](URL)<br/>    - 설명</code>
         </div>
         <div>
-          <h3 class="font-semibold text-purple-600 dark:text-purple-400 mb-1">🗞️ News</h3>
-          <code class="block bg-gray-100 dark:bg-gray-800 p-3 rounded-lg text-xs overflow-x-auto">
-- 🗞️ [기관명] [제목](URL)
-    - 설명
-          </code>
+          <h3 class="font-medium text-violet-600 dark:text-violet-400 mb-1">🗞️ News</h3>
+          <code class="block bg-sand-50 dark:bg-anthro-darkMid p-2 rounded-lg text-xs font-mono text-sand-600 dark:text-sand-400 overflow-x-auto">- 🗞️ [기관명] [제목](URL)<br/>    - 설명</code>
         </div>
       </div>
-    </div>
+    </details>
   </section>
 </Layout>
 
@@ -126,33 +161,29 @@ const currentWeek = Math.ceil(now.getDate() / 7).toString();
     '🗞': 'news',
   };
 
+  let parsedItems: any[] = [];
+
   function parseMarkdownItems(text: string, year: string, month: string, week: string) {
     const lines = text.split('\n');
     const items: any[] = [];
     let currentItem: any = null;
 
     for (const line of lines) {
-      // Check for item header
       const iconMatch = line.match(/^-\s*(📜|🧑🏻‍💻|🧑🏻💻|🗞️|🗞)/);
-      
+
       if (iconMatch) {
-        // Save previous item
-        if (currentItem) {
-          items.push(currentItem);
-        }
+        if (currentItem) items.push(currentItem);
 
         const icon = iconMatch[1];
         const type = TYPE_MAP[icon] || 'paper';
         const afterIcon = line.slice(iconMatch[0].length).trim();
 
-        // Extract [Org]
         const orgMatch = afterIcon.match(/^\[([^\]]+)\]\s*/);
         if (!orgMatch) continue;
 
         const org = orgMatch[1];
         const afterOrg = afterIcon.slice(orgMatch[0].length);
 
-        // Extract [Title](URL)
         let title = '';
         let url = '';
 
@@ -164,10 +195,7 @@ const currentWeek = Math.ceil(now.getDate() / 7).toString();
             if (afterOrg[i] === '[') bracketCount++;
             else if (afterOrg[i] === ']') {
               bracketCount--;
-              if (bracketCount === 0) {
-                titleEnd = i;
-                break;
-              }
+              if (bracketCount === 0) { titleEnd = i; break; }
             }
           }
 
@@ -175,9 +203,7 @@ const currentWeek = Math.ceil(now.getDate() / 7).toString();
             title = afterOrg.slice(1, titleEnd).replace(/\*\*/g, '').trim();
             const afterTitle = afterOrg.slice(titleEnd + 1).trim();
             const urlMatch = afterTitle.match(/^\(([^)]+)\)/);
-            if (urlMatch) {
-              url = urlMatch[1];
-            }
+            if (urlMatch) url = urlMatch[1];
           }
         }
 
@@ -190,22 +216,14 @@ const currentWeek = Math.ceil(now.getDate() / 7).toString();
           .slice(0, 100);
 
         currentItem = {
-          id,
+          id, type, org, title, url,
           date: `${year}-${month.padStart(2, '0')}-W${week.padStart(2, '0')}`,
-          year,
-          month,
-          week,
-          type,
-          org,
-          title,
-          url,
-          bullets: [],
-          tags: [],
+          year, month, week,
+          bullets: [], tags: [],
         };
         continue;
       }
 
-      // Check for bullet
       if (currentItem && line.match(/^\s+-\s+/)) {
         const match = line.match(/^(\s*)-\s+(.+)$/);
         if (match) {
@@ -217,11 +235,7 @@ const currentWeek = Math.ceil(now.getDate() / 7).toString();
       }
     }
 
-    // Don't forget last item
-    if (currentItem) {
-      items.push(currentItem);
-    }
-
+    if (currentItem) items.push(currentItem);
     return items;
   }
 
@@ -229,27 +243,30 @@ const currentWeek = Math.ceil(now.getDate() / 7).toString();
     const container = document.getElementById('preview-container');
     if (!container) return;
 
-    const typeLabels: Record<string, { icon: string; bg: string }> = {
-      paper: { icon: '📜', bg: 'bg-blue-100 dark:bg-blue-900/30' },
-      dev: { icon: '🧑🏻‍💻', bg: 'bg-green-100 dark:bg-green-900/30' },
-      news: { icon: '🗞️', bg: 'bg-purple-100 dark:bg-purple-900/30' },
+    const typeInfo: Record<string, { icon: string; color: string; bg: string }> = {
+      paper: { icon: '📜', color: 'text-blue-700 dark:text-blue-300', bg: 'bg-blue-50 dark:bg-blue-950/20 border-blue-100 dark:border-blue-900/30' },
+      dev: { icon: '🧑🏻‍💻', color: 'text-emerald-700 dark:text-emerald-300', bg: 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-900/30' },
+      news: { icon: '🗞️', color: 'text-violet-700 dark:text-violet-300', bg: 'bg-violet-50 dark:bg-violet-950/20 border-violet-100 dark:border-violet-900/30' },
     };
 
     container.innerHTML = items.map(item => {
-      const info = typeLabels[item.type] || typeLabels.paper;
+      const info = typeInfo[item.type] || typeInfo.paper;
       return `
-        <div class="p-4 rounded-xl border-2 ${info.bg} border-gray-200 dark:border-gray-700">
+        <div class="p-4 rounded-xl border ${info.bg}">
           <div class="flex items-center gap-2 mb-2">
-            <span class="text-lg">${info.icon}</span>
-            <span class="font-semibold">${item.org}</span>
-            <span class="text-xs text-gray-500">${item.date}</span>
+            <span class="text-xs font-semibold ${info.color}">${info.icon} ${item.type.toUpperCase()}</span>
+            <span class="text-sm font-medium text-sand-600 dark:text-sand-400">${item.org}</span>
+            <span class="text-xs text-sand-400 font-mono ml-auto">${item.date}</span>
           </div>
-          <h3 class="font-bold text-lg mb-2">${item.title}</h3>
-          ${item.url ? `<a href="${item.url}" target="_blank" class="text-sm text-indigo-600 hover:underline mb-2 block">${item.url}</a>` : ''}
+          <h3 class="font-semibold text-sand-800 dark:text-sand-100 mb-2">${item.title}</h3>
+          ${item.url ? `<a href="${item.url}" target="_blank" class="text-xs text-claude-500 hover:underline mb-2 block truncate">${item.url}</a>` : ''}
           ${item.bullets.length > 0 ? `
-            <ul class="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+            <ul class="text-sm text-sand-600 dark:text-sand-400 space-y-1">
               ${item.bullets.map((b: any) => `
-                <li class="${b.level > 1 ? 'ml-4 text-gray-500' : ''}">• ${b.text}</li>
+                <li class="${b.level > 1 ? 'ml-4 text-xs text-sand-500' : ''} flex items-start gap-2">
+                  <span class="mt-[7px] w-1 h-1 rounded-full bg-sand-400 flex-shrink-0"></span>
+                  <span>${b.text}</span>
+                </li>
               `).join('')}
             </ul>
           ` : ''}
@@ -258,41 +275,204 @@ const currentWeek = Math.ceil(now.getDate() / 7).toString();
     }).join('');
   }
 
+  // GitHub API integration
+  async function submitToGitHub(items: any[]) {
+    const token = localStorage.getItem('github_token');
+    const repo = (document.getElementById('github-repo') as HTMLInputElement)?.value || 'chanmuzi/temp-news-moltbot';
+    const statusEl = document.getElementById('submit-status');
+    const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
+
+    if (!token) {
+      showStatus('GitHub 토큰이 설정되지 않았습니다. 상단의 "GitHub 연결 설정"에서 토큰을 입력하세요.', 'error');
+      return;
+    }
+
+    submitBtn.disabled = true;
+    showStatus('GitHub에서 현재 데이터를 가져오는 중...', 'info');
+
+    try {
+      // 1. Get current file content
+      const getRes = await fetch(`https://api.github.com/repos/${repo}/contents/data/items.json`, {
+        headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+      });
+
+      if (!getRes.ok) {
+        throw new Error(`GitHub API error: ${getRes.status} ${getRes.statusText}`);
+      }
+
+      const fileData = await getRes.json();
+      const currentContent = JSON.parse(atob(fileData.content.replace(/\n/g, '')));
+
+      // 2. Merge new items (prepend, avoid duplicates)
+      const existingIds = new Set(currentContent.items.map((i: any) => i.id));
+      const newItems = items.filter(i => !existingIds.has(i.id));
+
+      if (newItems.length === 0) {
+        showStatus('추가할 새 항목이 없습니다 (이미 존재하는 항목입니다).', 'warn');
+        submitBtn.disabled = false;
+        return;
+      }
+
+      currentContent.items = [...newItems, ...currentContent.items];
+      currentContent.total_items = currentContent.items.length;
+      currentContent.last_updated = new Date().toISOString();
+
+      // Recalculate stats
+      currentContent.stats = {
+        total: currentContent.items.length,
+        paper: currentContent.items.filter((i: any) => i.type === 'paper').length,
+        dev: currentContent.items.filter((i: any) => i.type === 'dev').length,
+        news: currentContent.items.filter((i: any) => i.type === 'news').length,
+      };
+
+      // 3. Commit to GitHub
+      showStatus('커밋 중...', 'info');
+
+      const newContent = btoa(unescape(encodeURIComponent(JSON.stringify(currentContent, null, 2))));
+      const titles = newItems.map((i: any) => i.title).slice(0, 3).join(', ');
+      const commitMessage = `Add ${newItems.length} item(s): ${titles}`;
+
+      const putRes = await fetch(`https://api.github.com/repos/${repo}/contents/data/items.json`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `token ${token}`,
+          'Accept': 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: commitMessage,
+          content: newContent,
+          sha: fileData.sha,
+        }),
+      });
+
+      if (!putRes.ok) {
+        const errData = await putRes.json();
+        throw new Error(`Commit failed: ${errData.message}`);
+      }
+
+      showStatus(`${newItems.length}개 항목이 성공적으로 추가되었습니다! GitHub Actions가 자동으로 사이트를 빌드합니다.`, 'success');
+
+    } catch (err: any) {
+      showStatus(`오류: ${err.message}`, 'error');
+    } finally {
+      submitBtn.disabled = false;
+    }
+  }
+
+  function showStatus(message: string, type: 'info' | 'success' | 'error' | 'warn') {
+    const el = document.getElementById('submit-status');
+    if (!el) return;
+    el.classList.remove('hidden');
+
+    const colors: Record<string, string> = {
+      info: 'bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800',
+      success: 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800',
+      error: 'bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800',
+      warn: 'bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800',
+    };
+    el.className = `mt-4 p-4 rounded-xl text-sm ${colors[type]}`;
+    el.textContent = message;
+  }
+
+  function updateTokenStatus() {
+    const statusEl = document.getElementById('token-status');
+    const token = localStorage.getItem('github_token');
+    if (statusEl) {
+      if (token) {
+        statusEl.textContent = '연결됨';
+        statusEl.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400';
+      } else {
+        statusEl.textContent = '미연결';
+        statusEl.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-sand-100 dark:bg-sand-800 text-sand-400';
+      }
+    }
+  }
+
   // Event handlers
+  document.getElementById('toggle-settings')?.addEventListener('click', () => {
+    document.getElementById('settings-panel')?.classList.toggle('hidden');
+  });
+
+  document.getElementById('save-token')?.addEventListener('click', () => {
+    const input = document.getElementById('github-token') as HTMLInputElement;
+    if (input.value.trim()) {
+      localStorage.setItem('github_token', input.value.trim());
+      input.value = '';
+      updateTokenStatus();
+      showToast('토큰이 저장되었습니다');
+    }
+  });
+
+  document.getElementById('clear-token')?.addEventListener('click', () => {
+    localStorage.removeItem('github_token');
+    updateTokenStatus();
+    showToast('토큰이 삭제되었습니다');
+  });
+
   document.getElementById('parse-btn')?.addEventListener('click', () => {
     const textarea = document.getElementById('markdown-input') as HTMLTextAreaElement;
     const year = (document.getElementById('input-year') as HTMLInputElement).value;
     const month = (document.getElementById('input-month') as HTMLInputElement).value;
     const week = (document.getElementById('input-week') as HTMLInputElement).value;
 
-    const items = parseMarkdownItems(textarea.value, year, month, week);
+    parsedItems = parseMarkdownItems(textarea.value, year, month, week);
 
-    if (items.length === 0) {
-      alert('파싱된 항목이 없습니다. 형식을 확인해주세요.');
+    if (parsedItems.length === 0) {
+      showToast('파싱된 항목이 없습니다. 형식을 확인하세요.');
       return;
     }
 
-    // Show preview
     document.getElementById('preview-section')?.classList.remove('hidden');
-    renderPreview(items);
+    renderPreview(parsedItems);
 
-    // Generate JSON
     const jsonOutput = document.getElementById('json-output');
     if (jsonOutput) {
-      jsonOutput.textContent = JSON.stringify(items, null, 2);
+      jsonOutput.textContent = JSON.stringify(parsedItems, null, 2);
     }
   });
 
   document.getElementById('clear-btn')?.addEventListener('click', () => {
     (document.getElementById('markdown-input') as HTMLTextAreaElement).value = '';
     document.getElementById('preview-section')?.classList.add('hidden');
+    document.getElementById('submit-status')?.classList.add('hidden');
+    parsedItems = [];
+  });
+
+  document.getElementById('submit-btn')?.addEventListener('click', () => {
+    if (parsedItems.length > 0) {
+      submitToGitHub(parsedItems);
+    }
   });
 
   document.getElementById('copy-json')?.addEventListener('click', () => {
     const jsonOutput = document.getElementById('json-output');
     if (jsonOutput) {
       navigator.clipboard.writeText(jsonOutput.textContent || '');
-      alert('JSON이 클립보드에 복사되었습니다!');
+      showToast('JSON이 클립보드에 복사되었습니다');
     }
+  });
+
+  function showToast(message: string) {
+    const existing = document.querySelector('.toast');
+    if (existing) existing.remove();
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+  }
+
+  // Initialize
+  updateTokenStatus();
+
+  // Load saved repo
+  const savedRepo = localStorage.getItem('github_repo');
+  if (savedRepo) {
+    (document.getElementById('github-repo') as HTMLInputElement).value = savedRepo;
+  }
+
+  document.getElementById('github-repo')?.addEventListener('change', (e) => {
+    localStorage.setItem('github_repo', (e.target as HTMLInputElement).value);
   });
 </script>
