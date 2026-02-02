@@ -12,76 +12,113 @@ interface Props {
   url: string;
   bullets: Bullet[];
   date: string;
+  year?: string;
+  month?: string;
+  week?: string;
   tags?: string[];
+  showWeek?: boolean;
 }
 
-const { id, type, org, title, url, bullets, date, tags = [] } = Astro.props;
+const { id, type, org, title, url, bullets, date, year, month, week, tags = [], showWeek = false } = Astro.props;
 
-const typeInfo = {
-  paper: { icon: '📜', label: 'Paper', class: 'badge-paper' },
-  dev: { icon: '🧑🏻‍💻', label: 'Dev', class: 'badge-dev' },
-  news: { icon: '🗞️', label: 'News', class: 'badge-news' },
+const typeInfo: Record<string, { icon: string; label: string; gradient: string; bg: string }> = {
+  paper: { 
+    icon: '📜', 
+    label: 'Paper', 
+    gradient: 'from-blue-500 to-cyan-500',
+    bg: 'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800'
+  },
+  dev: { 
+    icon: '🧑🏻‍💻', 
+    label: 'Dev', 
+    gradient: 'from-green-500 to-emerald-500',
+    bg: 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800'
+  },
+  news: { 
+    icon: '🗞️', 
+    label: 'News', 
+    gradient: 'from-purple-500 to-pink-500',
+    bg: 'bg-purple-50 dark:bg-purple-950/30 border-purple-200 dark:border-purple-800'
+  },
 };
 
-const info = typeInfo[type as keyof typeof typeInfo] || typeInfo.paper;
+const info = typeInfo[type] || typeInfo.paper;
+
+// Format week display
+const weekDisplay = week ? `${week}주차` : '';
+const dateDisplay = showWeek && year && month ? `${year}.${month.padStart(2, '0')} ${weekDisplay}` : '';
 ---
 
-<article class="card group" data-type={type} data-org={org.toLowerCase()} data-title={title.toLowerCase()}>
-  <div class="flex items-start justify-between gap-4">
-    <div class="flex-1 min-w-0">
-      <div class="flex items-center gap-2 mb-2 flex-wrap">
-        <span class={`badge ${info.class}`}>
+<article 
+  class={`card group relative overflow-hidden rounded-2xl border-2 ${info.bg} p-5 hover:shadow-xl hover:shadow-${type === 'paper' ? 'blue' : type === 'dev' ? 'green' : 'purple'}-500/10 transition-all duration-300 hover:-translate-y-1`}
+  data-type={type} 
+  data-org={org.toLowerCase()} 
+  data-title={title.toLowerCase()}
+>
+  <!-- Type indicator bar -->
+  <div class={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${info.gradient}`}></div>
+  
+  <div class="flex flex-col h-full">
+    <!-- Header -->
+    <div class="flex items-start justify-between gap-3 mb-3">
+      <div class="flex items-center gap-2 flex-wrap">
+        <span class={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-gradient-to-r ${info.gradient} text-white text-xs font-bold shadow-sm`}>
           {info.icon} {info.label}
         </span>
-        <span class="text-sm text-gray-500 dark:text-gray-400 font-medium">
+        <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">
           {org}
         </span>
-        <span class="text-xs text-gray-400 dark:text-gray-500">
-          {date}
-        </span>
       </div>
-      
-      {url ? (
-        <a 
-          href={url} 
-          target="_blank" 
-          rel="noopener noreferrer"
-          class="text-lg font-semibold text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition-colors line-clamp-2"
-        >
-          {title}
-          <span class="inline-block ml-1 opacity-0 group-hover:opacity-100 transition-opacity">↗</span>
-        </a>
-      ) : (
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2">
-          {title}
-        </h3>
-      )}
-      
-      {bullets.length > 0 && (
-        <ul class="mt-3 space-y-1.5 text-sm text-gray-600 dark:text-gray-300">
-          {bullets.slice(0, 4).map((bullet) => (
-            <li class={`flex items-start gap-2 ${bullet.level > 1 ? 'ml-4 text-gray-500 dark:text-gray-400' : ''}`}>
-              <span class="text-gray-400 mt-0.5">{bullet.level > 1 ? '↳' : '•'}</span>
-              <span class="line-clamp-2">{bullet.text}</span>
-            </li>
-          ))}
-          {bullets.length > 4 && (
-            <li class="text-gray-400 dark:text-gray-500 text-xs ml-4">
-              +{bullets.length - 4} more...
-            </li>
-          )}
-        </ul>
-      )}
-      
-      {tags.length > 0 && (
-        <div class="mt-3 flex flex-wrap gap-1">
-          {tags.map((tag) => (
-            <span class="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded">
-              #{tag}
-            </span>
-          ))}
-        </div>
+      {dateDisplay && (
+        <span class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-md">
+          {dateDisplay}
+        </span>
       )}
     </div>
+    
+    <!-- Title -->
+    {url ? (
+      <a 
+        href={url} 
+        target="_blank" 
+        rel="noopener noreferrer"
+        class="block text-lg font-bold text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors mb-3 line-clamp-2 leading-snug"
+      >
+        {title}
+        <span class="inline-block ml-1 opacity-0 group-hover:opacity-100 transition-opacity text-indigo-500">↗</span>
+      </a>
+    ) : (
+      <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-3 line-clamp-2 leading-snug">
+        {title}
+      </h3>
+    )}
+    
+    <!-- Bullets -->
+    {bullets.length > 0 && (
+      <ul class="flex-1 space-y-2 text-sm text-gray-600 dark:text-gray-300">
+        {bullets.slice(0, 3).map((bullet) => (
+          <li class={`flex items-start gap-2 ${bullet.level > 1 ? 'ml-4 text-gray-500 dark:text-gray-400 text-xs' : ''}`}>
+            <span class={`mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0 ${bullet.level > 1 ? 'bg-gray-400' : `bg-gradient-to-r ${info.gradient}`}`}></span>
+            <span class="line-clamp-2 leading-relaxed">{bullet.text}</span>
+          </li>
+        ))}
+        {bullets.length > 3 && (
+          <li class="text-xs text-gray-400 dark:text-gray-500 ml-3.5 italic">
+            +{bullets.length - 3}개 더...
+          </li>
+        )}
+      </ul>
+    )}
+    
+    <!-- Tags -->
+    {tags.length > 0 && (
+      <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 flex flex-wrap gap-1.5">
+        {tags.map((tag) => (
+          <span class="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-md">
+            #{tag}
+          </span>
+        ))}
+      </div>
+    )}
   </div>
 </article>

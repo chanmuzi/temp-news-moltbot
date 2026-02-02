@@ -9,49 +9,62 @@ const orgs = [...new Set(itemsData.items.map(i => i.org))].sort();
 // Get all items sorted
 const allItems = [...itemsData.items].sort((a, b) => {
   const parseDate = (d: string) => {
-    const [year, rest] = d.split('-');
-    const month = rest?.replace('W', '') || '01';
-    return parseInt(year) * 100 + parseInt(month);
+    const parts = d.split('-');
+    const year = parseInt(parts[0]) || 0;
+    const month = parseInt(parts[1]) || 0;
+    const week = parseInt(parts[2]?.replace('W', '')) || 0;
+    return year * 10000 + month * 100 + week;
   };
   return parseDate(b.date) - parseDate(a.date);
 });
 
 // Get unique years
 const years = [...new Set(itemsData.items.map(i => i.year))].sort().reverse();
+
+// Stats
+const stats = itemsData.stats || {};
 ---
 
 <Layout title="검색 - NLP Paper News">
+  <!-- Header -->
   <section class="mb-8">
+    <div class="flex items-center gap-4 mb-4">
+      <a href={import.meta.env.BASE_URL} class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+        ← 홈
+      </a>
+    </div>
     <h1 class="text-3xl font-bold mb-2">🔍 상세 검색</h1>
-    <p class="text-gray-600 dark:text-gray-400">총 {itemsData.total_items.toLocaleString()}개 항목에서 검색</p>
+    <p class="text-gray-600 dark:text-gray-400">
+      총 <span class="font-bold text-indigo-600">{itemsData.total_items.toLocaleString()}</span>개 항목에서 검색
+    </p>
   </section>
 
-  <!-- Advanced Search -->
-  <section class="card mb-8">
+  <!-- Search Filters -->
+  <section class="bg-white dark:bg-gray-900 rounded-2xl border-2 border-gray-200 dark:border-gray-800 p-6 mb-8 shadow-sm">
     <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <div>
-        <label class="block text-sm font-medium mb-2">키워드</label>
+        <label class="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">🔤 키워드</label>
         <input
           type="text"
           id="keyword-input"
           placeholder="검색어 입력..."
-          class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary-500 outline-none"
+          class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:border-indigo-500 dark:focus:border-indigo-400 outline-none transition-all"
         />
       </div>
       
       <div>
-        <label class="block text-sm font-medium mb-2">타입</label>
-        <select id="type-select" class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary-500 outline-none">
+        <label class="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">📂 타입</label>
+        <select id="type-select" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:border-indigo-500 outline-none transition-all">
           <option value="">전체</option>
-          <option value="paper">📜 Paper</option>
-          <option value="dev">🧑🏻‍💻 Dev</option>
-          <option value="news">🗞️ News</option>
+          <option value="paper">📜 Paper ({stats.paper || 0})</option>
+          <option value="dev">🧑🏻‍💻 Dev ({stats.dev || 0})</option>
+          <option value="news">🗞️ News ({stats.news || 0})</option>
         </select>
       </div>
       
       <div>
-        <label class="block text-sm font-medium mb-2">연도</label>
-        <select id="year-select" class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary-500 outline-none">
+        <label class="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">📅 연도</label>
+        <select id="year-select" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:border-indigo-500 outline-none transition-all">
           <option value="">전체</option>
           {years.map((year) => (
             <option value={year}>{year}년</option>
@@ -60,44 +73,62 @@ const years = [...new Set(itemsData.items.map(i => i.year))].sort().reverse();
       </div>
       
       <div>
-        <label class="block text-sm font-medium mb-2">기관</label>
-        <select id="org-select" class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary-500 outline-none">
+        <label class="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">🏢 기관</label>
+        <select id="org-select" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:border-indigo-500 outline-none transition-all">
           <option value="">전체</option>
-          {orgs.slice(0, 100).map((org) => (
+          {orgs.slice(0, 150).map((org) => (
             <option value={org.toLowerCase()}>{org}</option>
           ))}
         </select>
       </div>
     </div>
     
-    <div class="mt-4 flex gap-2">
-      <button id="search-btn" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium">
-        검색
+    <div class="mt-6 flex flex-wrap gap-3">
+      <button id="search-btn" class="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-bold hover:shadow-lg hover:shadow-indigo-500/25 transition-all">
+        🔍 검색
       </button>
-      <button id="reset-btn" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-medium">
-        초기화
+      <button id="reset-btn" class="px-6 py-3 bg-gray-100 dark:bg-gray-800 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-all">
+        ↺ 초기화
       </button>
     </div>
   </section>
 
   <!-- Results -->
   <section>
-    <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center justify-between mb-6">
       <h2 class="text-xl font-bold">검색 결과</h2>
-      <span id="result-count" class="text-gray-500">{allItems.length}개</span>
+      <div class="flex items-center gap-3">
+        <span id="result-count" class="text-gray-500 bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full text-sm">
+          {allItems.length}개
+        </span>
+      </div>
     </div>
     
     <div id="results-grid" class="grid gap-4 md:grid-cols-2">
-      {allItems.map((item) => (
-        <div class="search-item" data-type={item.type} data-year={item.year} data-org={item.org.toLowerCase()} data-text={`${item.title} ${item.org} ${item.bullets.map(b => b.text).join(' ')}`.toLowerCase()}>
-          <ItemCard {...item} />
+      {allItems.slice(0, 50).map((item) => (
+        <div 
+          class="search-item" 
+          data-type={item.type} 
+          data-year={item.year} 
+          data-org={item.org.toLowerCase()} 
+          data-text={`${item.title} ${item.org} ${item.bullets.map(b => b.text).join(' ')}`.toLowerCase()}
+        >
+          <ItemCard {...item} showWeek={true} />
         </div>
       ))}
     </div>
     
-    <div id="no-results" class="hidden text-center py-12 text-gray-500">
-      <p class="text-4xl mb-4">🔍</p>
-      <p>검색 결과가 없습니다</p>
+    <!-- Load more -->
+    <div id="load-more-container" class="text-center mt-8">
+      <button id="load-more-btn" class="px-8 py-3 bg-gray-100 dark:bg-gray-800 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-all">
+        더 보기 ({Math.max(0, allItems.length - 50)}개 더)
+      </button>
+    </div>
+    
+    <div id="no-results" class="hidden text-center py-16">
+      <p class="text-6xl mb-4">🔍</p>
+      <p class="text-xl text-gray-500 dark:text-gray-400">검색 결과가 없습니다</p>
+      <p class="text-sm text-gray-400 dark:text-gray-500 mt-2">다른 키워드로 검색해보세요</p>
     </div>
   </section>
 </Layout>
@@ -111,17 +142,22 @@ const years = [...new Set(itemsData.items.map(i => i.year))].sort().reverse();
   const resetBtn = document.getElementById('reset-btn');
   const resultCount = document.getElementById('result-count');
   const noResults = document.getElementById('no-results');
+  const resultsGrid = document.getElementById('results-grid');
+  const loadMoreBtn = document.getElementById('load-more-btn');
+  const loadMoreContainer = document.getElementById('load-more-container');
   const items = document.querySelectorAll('.search-item');
   
+  let shownCount = 50;
+  
   function search() {
-    const keyword = keywordInput.value.toLowerCase();
+    const keyword = keywordInput.value.toLowerCase().trim();
     const type = typeSelect.value;
     const year = yearSelect.value;
     const org = orgSelect.value;
     
     let visibleCount = 0;
     
-    items.forEach((item) => {
+    items.forEach((item, index) => {
       const el = item as HTMLElement;
       const itemType = el.getAttribute('data-type') || '';
       const itemYear = el.getAttribute('data-year') || '';
@@ -133,13 +169,26 @@ const years = [...new Set(itemsData.items.map(i => i.year))].sort().reverse();
       const matchYear = !year || itemYear === year;
       const matchOrg = !org || itemOrg.includes(org);
       
-      const show = matchKeyword && matchType && matchYear && matchOrg;
+      const matchesFilter = matchKeyword && matchType && matchYear && matchOrg;
+      
+      // Show based on filter AND pagination
+      const show = matchesFilter && (keyword || visibleCount < shownCount);
       el.style.display = show ? '' : 'none';
-      if (show) visibleCount++;
+      if (matchesFilter) visibleCount++;
     });
     
     resultCount!.textContent = `${visibleCount}개`;
     noResults!.classList.toggle('hidden', visibleCount > 0);
+    resultsGrid!.classList.toggle('hidden', visibleCount === 0);
+    
+    // Update load more button
+    const remaining = visibleCount - shownCount;
+    if (remaining > 0 && !keyword) {
+      loadMoreContainer!.classList.remove('hidden');
+      loadMoreBtn!.textContent = `더 보기 (${remaining}개 더)`;
+    } else {
+      loadMoreContainer!.classList.add('hidden');
+    }
   }
   
   searchBtn?.addEventListener('click', search);
@@ -147,9 +196,15 @@ const years = [...new Set(itemsData.items.map(i => i.year))].sort().reverse();
     if (e.key === 'Enter') search();
   });
   
-  // Real-time search on select change
+  // Real-time filter on select change
   [typeSelect, yearSelect, orgSelect].forEach((el) => {
     el?.addEventListener('change', search);
+  });
+  
+  // Load more
+  loadMoreBtn?.addEventListener('click', () => {
+    shownCount += 50;
+    search();
   });
   
   resetBtn?.addEventListener('click', () => {
@@ -157,6 +212,10 @@ const years = [...new Set(itemsData.items.map(i => i.year))].sort().reverse();
     typeSelect.value = '';
     yearSelect.value = '';
     orgSelect.value = '';
+    shownCount = 50;
     search();
   });
+  
+  // Initial load
+  search();
 </script>

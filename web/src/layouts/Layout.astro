@@ -4,7 +4,7 @@ interface Props {
   description?: string;
 }
 
-const { title, description = "NLP 논문 & AI 뉴스 큐레이션" } = Astro.props;
+const { title, description = "AI, NLP, ML 분야의 최신 논문과 뉴스를 큐레이션합니다." } = Astro.props;
 const base = import.meta.env.BASE_URL;
 ---
 
@@ -14,24 +14,43 @@ const base = import.meta.env.BASE_URL;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
+    <meta name="theme-color" content="#4f46e5" />
     <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <title>{title}</title>
   </head>
-  <body class="min-h-screen">
-    <nav class="sticky top-0 z-50 bg-white/80 dark:bg-gray-950/80 backdrop-blur-lg border-b border-gray-200 dark:border-gray-800">
+  <body class="min-h-screen font-sans antialiased">
+    <nav class="sticky top-0 z-50 bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-800/50">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16 items-center">
-          <a href={base} class="flex items-center gap-2">
-            <span class="text-2xl">📚</span>
-            <span class="font-bold text-xl">NLP Paper News</span>
+          <a href={base} class="flex items-center gap-3 group">
+            <span class="text-3xl group-hover:scale-110 transition-transform">📚</span>
+            <span class="font-black text-xl bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              NLP Paper News
+            </span>
           </a>
-          <div class="flex items-center gap-4">
-            <a href={`${base}search`} class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
-              🔍 검색
+          <div class="flex items-center gap-2">
+            <a 
+              href={`${base}search`} 
+              class="flex items-center gap-2 px-4 py-2 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all font-medium"
+            >
+              🔍 <span class="hidden sm:inline">검색</span>
             </a>
-            <button id="theme-toggle" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-              <span class="dark:hidden">🌙</span>
-              <span class="hidden dark:inline">☀️</span>
+            <a
+              href={`${base}admin`}
+              class="flex items-center gap-2 px-4 py-2 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all font-medium"
+            >
+              ✏️ <span class="hidden sm:inline">추가</span>
+            </a>
+            <button 
+              id="theme-toggle" 
+              class="p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+              aria-label="Toggle theme"
+            >
+              <span class="dark:hidden text-xl">🌙</span>
+              <span class="hidden dark:inline text-xl">☀️</span>
             </button>
           </div>
         </div>
@@ -42,9 +61,21 @@ const base = import.meta.env.BASE_URL;
       <slot />
     </main>
     
-    <footer class="border-t border-gray-200 dark:border-gray-800 mt-16">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center text-gray-500 dark:text-gray-400">
-        <p>Made with ❤️ by <a href="https://github.com/chanmuzi" class="text-primary-600 hover:underline">chanmuzi</a></p>
+    <footer class="border-t border-gray-200 dark:border-gray-800 mt-16 bg-gray-50 dark:bg-gray-900/50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">📚</span>
+            <span class="font-bold text-gray-600 dark:text-gray-400">NLP Paper News</span>
+          </div>
+          <div class="flex items-center gap-6 text-sm text-gray-500 dark:text-gray-400">
+            <a href="https://github.com/chanmuzi" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+              GitHub
+            </a>
+            <span>•</span>
+            <span>Made with ❤️</span>
+          </div>
+        </div>
       </div>
     </footer>
     
@@ -64,4 +95,8 @@ const base = import.meta.env.BASE_URL;
 
 <style is:global>
   @import '../styles/global.css';
+  
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
 </style>

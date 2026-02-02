@@ -1,0 +1,298 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+// Get current date info for defaults
+const now = new Date();
+const currentYear = now.getFullYear().toString();
+const currentMonth = (now.getMonth() + 1).toString();
+const currentWeek = Math.ceil(now.getDate() / 7).toString();
+---
+
+<Layout title="항목 추가 - NLP Paper News">
+  <section class="max-w-4xl mx-auto">
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold mb-2">✏️ 새 항목 추가</h1>
+      <p class="text-gray-600 dark:text-gray-400">
+        기존 마크다운 형식을 그대로 붙여넣으면 자동으로 파싱됩니다.
+      </p>
+    </div>
+
+    <!-- Markdown Input -->
+    <div class="card bg-white dark:bg-gray-900 rounded-2xl border-2 border-gray-200 dark:border-gray-800 p-6 mb-8">
+      <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+        📝 마크다운 입력
+        <span class="text-sm font-normal text-gray-500">(여러 항목 동시 입력 가능)</span>
+      </h2>
+      
+      <div class="mb-4">
+        <label class="block text-sm font-medium mb-2">날짜 정보</label>
+        <div class="flex gap-3">
+          <div>
+            <input type="number" id="input-year" value={currentYear} min="2020" max="2030" 
+              class="w-24 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800" />
+            <span class="text-sm text-gray-500 ml-1">년</span>
+          </div>
+          <div>
+            <input type="number" id="input-month" value={currentMonth} min="1" max="12"
+              class="w-20 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800" />
+            <span class="text-sm text-gray-500 ml-1">월</span>
+          </div>
+          <div>
+            <input type="number" id="input-week" value={currentWeek} min="1" max="5"
+              class="w-20 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800" />
+            <span class="text-sm text-gray-500 ml-1">주차</span>
+          </div>
+        </div>
+      </div>
+      
+      <textarea 
+        id="markdown-input"
+        rows="12"
+        placeholder="- 📜 [Anthropic, Stanford] [**Shaping capabilities with token-level data filtering**](https://arxiv.org/abs/2601.21571)
+    - 언어 모델의 undesired capabilities를 줄이는 대부분의 방식은 post hoc 스타일임을 문제점으로 지적
+        - → 대신 pretraining 동안에 해결되어야 하는 것으로 대안 제시
+    - 의료 도메인을 대상으로 documents filtering보다 tokens filtering이 훨씬 더 효과적이었음을 입증
+
+- 🧑🏻‍💻 [OpenAI] [Introducing GPT-5.2](https://openai.com/index/introducing-gpt-5-2/)
+    - ChatGPT - Instant/Thinking/Pro, API - 5.2/5.2-chat-latest/5.2-pro"
+        class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:border-indigo-500 dark:focus:border-indigo-400 outline-none transition-all font-mono text-sm"
+      ></textarea>
+      
+      <div class="mt-4 flex gap-3">
+        <button id="parse-btn" class="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-bold hover:shadow-lg hover:shadow-indigo-500/25 transition-all">
+          🔍 파싱 미리보기
+        </button>
+        <button id="clear-btn" class="px-6 py-3 bg-gray-100 dark:bg-gray-800 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-all">
+          지우기
+        </button>
+      </div>
+    </div>
+
+    <!-- Preview -->
+    <div id="preview-section" class="hidden mb-8">
+      <h2 class="text-xl font-bold mb-4">👀 미리보기</h2>
+      <div id="preview-container" class="space-y-4"></div>
+      
+      <div class="mt-6 p-4 bg-amber-50 dark:bg-amber-950/30 rounded-xl border border-amber-200 dark:border-amber-800">
+        <h3 class="font-bold text-amber-800 dark:text-amber-200 mb-2">📋 JSON 출력</h3>
+        <p class="text-sm text-amber-700 dark:text-amber-300 mb-3">
+          아래 JSON을 복사하여 <code class="bg-amber-100 dark:bg-amber-900 px-1 rounded">data/items.json</code>의 items 배열 맨 앞에 추가하세요.
+        </p>
+        <pre id="json-output" class="bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto text-xs"></pre>
+        <button id="copy-json" class="mt-3 px-4 py-2 bg-amber-600 text-white rounded-lg font-medium hover:bg-amber-700 transition-all">
+          📋 JSON 복사
+        </button>
+      </div>
+    </div>
+
+    <!-- Format Guide -->
+    <div class="card bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-200 dark:border-gray-800 p-6">
+      <h2 class="text-lg font-bold mb-4">📖 지원 형식</h2>
+      <div class="space-y-4 text-sm">
+        <div>
+          <h3 class="font-semibold text-indigo-600 dark:text-indigo-400 mb-1">📜 Paper</h3>
+          <code class="block bg-gray-100 dark:bg-gray-800 p-3 rounded-lg text-xs overflow-x-auto">
+- 📜 [기관명] [**논문 제목**](https://arxiv.org/abs/...)
+    - 설명 1
+    - 설명 2
+        - 하위 설명
+          </code>
+        </div>
+        <div>
+          <h3 class="font-semibold text-green-600 dark:text-green-400 mb-1">🧑🏻‍💻 Dev</h3>
+          <code class="block bg-gray-100 dark:bg-gray-800 p-3 rounded-lg text-xs overflow-x-auto">
+- 🧑🏻‍💻 [기관명] [제목](URL)
+    - 설명
+          </code>
+        </div>
+        <div>
+          <h3 class="font-semibold text-purple-600 dark:text-purple-400 mb-1">🗞️ News</h3>
+          <code class="block bg-gray-100 dark:bg-gray-800 p-3 rounded-lg text-xs overflow-x-auto">
+- 🗞️ [기관명] [제목](URL)
+    - 설명
+          </code>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const TYPE_MAP: Record<string, string> = {
+    '📜': 'paper',
+    '🧑🏻‍💻': 'dev',
+    '🧑🏻💻': 'dev',
+    '🗞️': 'news',
+    '🗞': 'news',
+  };
+
+  function parseMarkdownItems(text: string, year: string, month: string, week: string) {
+    const lines = text.split('\n');
+    const items: any[] = [];
+    let currentItem: any = null;
+
+    for (const line of lines) {
+      // Check for item header
+      const iconMatch = line.match(/^-\s*(📜|🧑🏻‍💻|🧑🏻💻|🗞️|🗞)/);
+      
+      if (iconMatch) {
+        // Save previous item
+        if (currentItem) {
+          items.push(currentItem);
+        }
+
+        const icon = iconMatch[1];
+        const type = TYPE_MAP[icon] || 'paper';
+        const afterIcon = line.slice(iconMatch[0].length).trim();
+
+        // Extract [Org]
+        const orgMatch = afterIcon.match(/^\[([^\]]+)\]\s*/);
+        if (!orgMatch) continue;
+
+        const org = orgMatch[1];
+        const afterOrg = afterIcon.slice(orgMatch[0].length);
+
+        // Extract [Title](URL)
+        let title = '';
+        let url = '';
+
+        if (afterOrg.startsWith('[')) {
+          let bracketCount = 0;
+          let titleEnd = -1;
+
+          for (let i = 0; i < afterOrg.length; i++) {
+            if (afterOrg[i] === '[') bracketCount++;
+            else if (afterOrg[i] === ']') {
+              bracketCount--;
+              if (bracketCount === 0) {
+                titleEnd = i;
+                break;
+              }
+            }
+          }
+
+          if (titleEnd > 0) {
+            title = afterOrg.slice(1, titleEnd).replace(/\*\*/g, '').trim();
+            const afterTitle = afterOrg.slice(titleEnd + 1).trim();
+            const urlMatch = afterTitle.match(/^\(([^)]+)\)/);
+            if (urlMatch) {
+              url = urlMatch[1];
+            }
+          }
+        }
+
+        if (!title) continue;
+
+        const id = `${org}-${title}`
+          .toLowerCase()
+          .replace(/[^a-z0-9가-힣\s-]/g, '')
+          .replace(/\s+/g, '-')
+          .slice(0, 100);
+
+        currentItem = {
+          id,
+          date: `${year}-${month.padStart(2, '0')}-W${week.padStart(2, '0')}`,
+          year,
+          month,
+          week,
+          type,
+          org,
+          title,
+          url,
+          bullets: [],
+          tags: [],
+        };
+        continue;
+      }
+
+      // Check for bullet
+      if (currentItem && line.match(/^\s+-\s+/)) {
+        const match = line.match(/^(\s*)-\s+(.+)$/);
+        if (match) {
+          const indent = match[1].length;
+          const bulletText = match[2].trim();
+          const level = indent < 4 ? 1 : indent < 8 ? 2 : 3;
+          currentItem.bullets.push({ text: bulletText, level });
+        }
+      }
+    }
+
+    // Don't forget last item
+    if (currentItem) {
+      items.push(currentItem);
+    }
+
+    return items;
+  }
+
+  function renderPreview(items: any[]) {
+    const container = document.getElementById('preview-container');
+    if (!container) return;
+
+    const typeLabels: Record<string, { icon: string; bg: string }> = {
+      paper: { icon: '📜', bg: 'bg-blue-100 dark:bg-blue-900/30' },
+      dev: { icon: '🧑🏻‍💻', bg: 'bg-green-100 dark:bg-green-900/30' },
+      news: { icon: '🗞️', bg: 'bg-purple-100 dark:bg-purple-900/30' },
+    };
+
+    container.innerHTML = items.map(item => {
+      const info = typeLabels[item.type] || typeLabels.paper;
+      return `
+        <div class="p-4 rounded-xl border-2 ${info.bg} border-gray-200 dark:border-gray-700">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-lg">${info.icon}</span>
+            <span class="font-semibold">${item.org}</span>
+            <span class="text-xs text-gray-500">${item.date}</span>
+          </div>
+          <h3 class="font-bold text-lg mb-2">${item.title}</h3>
+          ${item.url ? `<a href="${item.url}" target="_blank" class="text-sm text-indigo-600 hover:underline mb-2 block">${item.url}</a>` : ''}
+          ${item.bullets.length > 0 ? `
+            <ul class="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+              ${item.bullets.map((b: any) => `
+                <li class="${b.level > 1 ? 'ml-4 text-gray-500' : ''}">• ${b.text}</li>
+              `).join('')}
+            </ul>
+          ` : ''}
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Event handlers
+  document.getElementById('parse-btn')?.addEventListener('click', () => {
+    const textarea = document.getElementById('markdown-input') as HTMLTextAreaElement;
+    const year = (document.getElementById('input-year') as HTMLInputElement).value;
+    const month = (document.getElementById('input-month') as HTMLInputElement).value;
+    const week = (document.getElementById('input-week') as HTMLInputElement).value;
+
+    const items = parseMarkdownItems(textarea.value, year, month, week);
+
+    if (items.length === 0) {
+      alert('파싱된 항목이 없습니다. 형식을 확인해주세요.');
+      return;
+    }
+
+    // Show preview
+    document.getElementById('preview-section')?.classList.remove('hidden');
+    renderPreview(items);
+
+    // Generate JSON
+    const jsonOutput = document.getElementById('json-output');
+    if (jsonOutput) {
+      jsonOutput.textContent = JSON.stringify(items, null, 2);
+    }
+  });
+
+  document.getElementById('clear-btn')?.addEventListener('click', () => {
+    (document.getElementById('markdown-input') as HTMLTextAreaElement).value = '';
+    document.getElementById('preview-section')?.classList.add('hidden');
+  });
+
+  document.getElementById('copy-json')?.addEventListener('click', () => {
+    const jsonOutput = document.getElementById('json-output');
+    if (jsonOutput) {
+      navigator.clipboard.writeText(jsonOutput.textContent || '');
+      alert('JSON이 클립보드에 복사되었습니다!');
+    }
+  });
+</script>

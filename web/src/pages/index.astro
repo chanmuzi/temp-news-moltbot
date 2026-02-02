@@ -5,16 +5,52 @@ import itemsData from '../../../data/items.json';
 
 // Sort items by date (newest first)
 const sortedItems = [...itemsData.items].sort((a, b) => {
-  // Parse date format: "2026-02-W01" -> comparable value
   const parseDate = (d: string) => {
-    const [year, rest] = d.split('-');
-    const month = rest?.replace('W', '') || '01';
-    return parseInt(year) * 100 + parseInt(month);
+    const parts = d.split('-');
+    const year = parseInt(parts[0]) || 0;
+    const month = parseInt(parts[1]) || 0;
+    const week = parseInt(parts[2]?.replace('W', '')) || 0;
+    return year * 10000 + month * 100 + week;
   };
   return parseDate(b.date) - parseDate(a.date);
 });
 
-// Group items by year and month
+// Get latest 2 weeks of items
+const latestDate = sortedItems[0]?.date || '';
+const latestParts = latestDate.split('-');
+const latestYear = parseInt(latestParts[0]) || 2026;
+const latestMonth = parseInt(latestParts[1]) || 1;
+const latestWeek = parseInt(latestParts[2]?.replace('W', '')) || 1;
+
+// Calculate 2 weeks back
+const getWeeksBack = (year: number, month: number, week: number, weeksBack: number) => {
+  let w = week - weeksBack;
+  let m = month;
+  let y = year;
+  while (w < 1) {
+    m--;
+    if (m < 1) { m = 12; y--; }
+    w += 4;
+  }
+  return { year: y, month: m, week: Math.max(1, w) };
+};
+
+const twoWeeksBack = getWeeksBack(latestYear, latestMonth, latestWeek, 2);
+const cutoffValue = twoWeeksBack.year * 10000 + twoWeeksBack.month * 100 + twoWeeksBack.week;
+
+const latestItems = sortedItems.filter(item => {
+  const parts = item.date.split('-');
+  const y = parseInt(parts[0]) || 0;
+  const m = parseInt(parts[1]) || 0;
+  const w = parseInt(parts[2]?.replace('W', '')) || 0;
+  return y * 10000 + m * 100 + w >= cutoffValue;
+});
+
+// Pagination settings
+const ITEMS_PER_PAGE = 20;
+const totalPages = Math.ceil(sortedItems.length / ITEMS_PER_PAGE);
+
+// Group items by year-month for display
 const grouped = sortedItems.reduce((acc, item) => {
   const key = `${item.year}-${item.month}`;
   if (!acc[key]) {
@@ -30,13 +66,12 @@ const groups = Object.values(grouped).sort((a, b) => {
   return bVal - aVal;
 });
 
-// Get latest items for hero section
-const latestItems = sortedItems.slice(0, 6);
-
 // Stats
-const totalItems = itemsData.total_items;
-const paperCount = sortedItems.filter(i => i.type === 'paper').length;
-const devCount = sortedItems.filter(i => i.type === 'dev').length;
+const stats = itemsData.stats || {
+  paper: sortedItems.filter(i => i.type === 'paper').length,
+  dev: sortedItems.filter(i => i.type === 'dev').length,
+  news: sortedItems.filter(i => i.type === 'news').length,
+};
 
 const monthNames: Record<string, string> = {
   '1': '1월', '2': '2월', '3': '3월', '4': '4월',
@@ -47,153 +82,274 @@ const monthNames: Record<string, string> = {
 
 <Layout title="NLP Paper News - AI 논문 & 뉴스 큐레이션">
   <!-- Hero Section -->
-  <section class="text-center mb-12">
-    <h1 class="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">
-      NLP Paper News
-    </h1>
-    <p class="text-lg text-gray-600 dark:text-gray-400 mb-6">
-      AI, NLP, ML 분야의 최신 논문과 뉴스를 큐레이션합니다
-    </p>
-    
-    <!-- Stats -->
-    <div class="flex justify-center gap-8 text-center">
-      <div>
-        <div class="text-3xl font-bold text-primary-600">{totalItems.toLocaleString()}</div>
-        <div class="text-sm text-gray-500">전체 항목</div>
-      </div>
-      <div>
-        <div class="text-3xl font-bold text-blue-600">{paperCount.toLocaleString()}</div>
-        <div class="text-sm text-gray-500">📜 Papers</div>
-      </div>
-      <div>
-        <div class="text-3xl font-bold text-green-600">{devCount.toLocaleString()}</div>
-        <div class="text-sm text-gray-500">🧑🏻‍💻 Dev</div>
+  <section class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 p-8 md:p-12 mb-10 text-white">
+    <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\"30\" height=\"30\" viewBox=\"0 0 30 30\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cpath d=\"M1.22676 0C1.91374 0 2.45351 0.539773 2.45351 1.22676C2.45351 1.91374 1.91374 2.45351 1.22676 2.45351C0.539773 2.45351 0 1.91374 0 1.22676C0 0.539773 0.539773 0 1.22676 0Z\" fill=\"rgba(255,255,255,0.07)\"%3E%3C/path%3E%3C/svg%3E')] opacity-50"></div>
+    <div class="relative">
+      <h1 class="text-4xl md:text-5xl font-black mb-3">
+        📚 NLP Paper News
+      </h1>
+      <p class="text-lg md:text-xl text-white/80 mb-8 max-w-2xl">
+        AI, NLP, ML 분야의 최신 논문과 뉴스를 한눈에. 매주 업데이트됩니다.
+      </p>
+      
+      <!-- Stats Cards -->
+      <div class="flex flex-wrap gap-4">
+        <div class="bg-white/15 backdrop-blur-sm rounded-2xl px-6 py-4 border border-white/20">
+          <div class="text-3xl font-black">{itemsData.total_items.toLocaleString()}</div>
+          <div class="text-sm text-white/70">전체 항목</div>
+        </div>
+        <div class="bg-white/15 backdrop-blur-sm rounded-2xl px-6 py-4 border border-white/20">
+          <div class="text-3xl font-black">{stats.paper.toLocaleString()}</div>
+          <div class="text-sm text-white/70">📜 Papers</div>
+        </div>
+        <div class="bg-white/15 backdrop-blur-sm rounded-2xl px-6 py-4 border border-white/20">
+          <div class="text-3xl font-black">{stats.dev.toLocaleString()}</div>
+          <div class="text-sm text-white/70">🧑🏻‍💻 Dev</div>
+        </div>
+        <div class="bg-white/15 backdrop-blur-sm rounded-2xl px-6 py-4 border border-white/20">
+          <div class="text-3xl font-black">{stats.news.toLocaleString()}</div>
+          <div class="text-sm text-white/70">🗞️ News</div>
+        </div>
       </div>
     </div>
+  </section>
+
+  <!-- Quick Actions -->
+  <section class="flex flex-wrap gap-3 mb-8">
+    <a href="#latest" class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full font-medium hover:shadow-lg hover:shadow-orange-500/25 transition-all">
+      🔥 최신 항목
+    </a>
+    <a href={`${import.meta.env.BASE_URL}search`} class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-full font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-all">
+      🔍 상세 검색
+    </a>
+    <button id="filter-paper" class="filter-type-btn inline-flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full font-medium hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-all">
+      📜 Papers
+    </button>
+    <button id="filter-dev" class="filter-type-btn inline-flex items-center gap-2 px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full font-medium hover:bg-green-200 dark:hover:bg-green-900/50 transition-all">
+      🧑🏻‍💻 Dev
+    </button>
+    <button id="filter-news" class="filter-type-btn inline-flex items-center gap-2 px-4 py-2 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full font-medium hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-all">
+      🗞️ News
+    </button>
+    <button id="filter-all" class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-full font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-all">
+      전체 보기
+    </button>
   </section>
 
   <!-- Search Box -->
-  <section class="mb-8">
-    <div class="relative max-w-2xl mx-auto">
+  <section class="mb-10">
+    <div class="relative max-w-2xl">
       <input
         type="text"
-        id="search-input"
-        placeholder="논문, 기관, 키워드 검색..."
-        class="w-full px-4 py-3 pl-12 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+        id="quick-search"
+        placeholder="빠른 검색... (제목, 기관, 키워드)"
+        class="w-full px-5 py-4 pl-14 rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 focus:border-indigo-500 dark:focus:border-indigo-400 outline-none transition-all text-lg"
       />
-      <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
+      <span class="absolute left-5 top-1/2 -translate-y-1/2 text-2xl">🔍</span>
+      <span id="search-count" class="absolute right-5 top-1/2 -translate-y-1/2 text-sm text-gray-400 hidden"></span>
     </div>
-  </section>
-
-  <!-- Filter Buttons -->
-  <section class="mb-8 flex flex-wrap justify-center gap-2">
-    <button data-filter="all" class="filter-btn active px-4 py-2 rounded-lg bg-gray-900 text-white dark:bg-white dark:text-gray-900 font-medium transition-all">
-      전체
-    </button>
-    <button data-filter="paper" class="filter-btn px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 font-medium transition-all">
-      📜 Paper
-    </button>
-    <button data-filter="dev" class="filter-btn px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 font-medium transition-all">
-      🧑🏻‍💻 Dev
-    </button>
-    <button data-filter="news" class="filter-btn px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 font-medium transition-all">
-      🗞️ News
-    </button>
   </section>
 
   <!-- Latest Section -->
-  <section class="mb-12">
-    <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
-      <span class="text-2xl">🔥</span> 최신 항목
-    </h2>
+  <section id="latest" class="mb-16">
+    <div class="flex items-center gap-3 mb-6">
+      <h2 class="text-2xl font-bold">🔥 최신 항목</h2>
+      <span class="text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full">
+        최근 2주
+      </span>
+    </div>
     <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3" id="latest-grid">
-      {latestItems.map((item) => (
-        <ItemCard {...item} />
+      {latestItems.slice(0, 12).map((item) => (
+        <ItemCard {...item} showWeek={true} />
       ))}
     </div>
+    {latestItems.length > 12 && (
+      <div class="text-center mt-6">
+        <button id="show-more-latest" class="px-6 py-3 bg-gray-100 dark:bg-gray-800 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-all">
+          +{latestItems.length - 12}개 더 보기
+        </button>
+      </div>
+    )}
   </section>
 
-  <!-- All Items by Month -->
+  <!-- All Items with Pagination -->
   <section id="all-items">
-    {groups.map((group) => (
-      <div class="mb-12 month-section" data-year={group.year} data-month={group.month}>
-        <h2 class="text-xl font-bold mb-4 sticky top-16 bg-gray-50/90 dark:bg-gray-950/90 backdrop-blur-sm py-2 z-10 border-b border-gray-200 dark:border-gray-800">
-          📅 {group.year}년 {monthNames[group.month] || group.month}
-          <span class="text-sm font-normal text-gray-500 ml-2">({group.items.length}개)</span>
-        </h2>
-        <div class="grid gap-4 md:grid-cols-2 items-grid">
-          {group.items.map((item) => (
-            <ItemCard {...item} />
-          ))}
-        </div>
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-2xl font-bold">📋 전체 항목</h2>
+      <div class="text-sm text-gray-500">
+        총 {sortedItems.length.toLocaleString()}개
       </div>
-    ))}
+    </div>
+    
+    <!-- Month groups -->
+    <div id="items-container">
+      {groups.map((group, groupIndex) => (
+        <div 
+          class="mb-12 month-section" 
+          data-year={group.year} 
+          data-month={group.month}
+          data-page={Math.floor(groupIndex / 3)}
+        >
+          <h3 class="flex items-center gap-3 text-xl font-bold mb-4 sticky top-16 bg-gray-50/95 dark:bg-gray-950/95 backdrop-blur-sm py-3 z-10 border-b border-gray-200 dark:border-gray-800">
+            <span class="text-2xl">📅</span>
+            {group.year}년 {monthNames[group.month] || group.month}
+            <span class="text-sm font-normal text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full">
+              {group.items.length}개
+            </span>
+          </h3>
+          <div class="grid gap-4 md:grid-cols-2 items-grid">
+            {group.items.map((item) => (
+              <ItemCard {...item} showWeek={true} />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+    
+    <!-- Pagination -->
+    <div id="pagination" class="flex justify-center items-center gap-2 mt-8 mb-16">
+      <button id="prev-page" class="px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-200 dark:hover:bg-gray-700 transition-all">
+        ← 이전
+      </button>
+      <span id="page-info" class="px-4 py-2 text-gray-600 dark:text-gray-400">
+        1 / {totalPages}
+      </span>
+      <button id="next-page" class="px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-200 dark:hover:bg-gray-700 transition-all">
+        다음 →
+      </button>
+    </div>
   </section>
   
   <!-- Back to top -->
   <button 
     id="back-to-top"
-    class="fixed bottom-8 right-8 p-3 bg-primary-600 text-white rounded-full shadow-lg opacity-0 pointer-events-none transition-all hover:bg-primary-700"
+    class="fixed bottom-8 right-8 p-4 bg-indigo-600 text-white rounded-full shadow-lg shadow-indigo-600/30 opacity-0 pointer-events-none transition-all hover:bg-indigo-700 hover:scale-110 z-50"
   >
     ↑
   </button>
 </Layout>
 
-<script>
-  // Search functionality
-  const searchInput = document.getElementById('search-input') as HTMLInputElement;
+<script define:vars={{ totalPages }}>
+  // Pagination state
+  let currentPage = 0;
+  let currentFilter = 'all';
+  const monthSections = document.querySelectorAll('.month-section');
   const cards = document.querySelectorAll('.card');
-  const sections = document.querySelectorAll('.month-section');
+  const pageInfo = document.getElementById('page-info');
+  const prevBtn = document.getElementById('prev-page');
+  const nextBtn = document.getElementById('next-page');
   
-  searchInput?.addEventListener('input', (e) => {
-    const query = (e.target as HTMLInputElement).value.toLowerCase();
+  // Months per page
+  const MONTHS_PER_PAGE = 3;
+  const maxPage = Math.ceil(monthSections.length / MONTHS_PER_PAGE) - 1;
+  
+  function updatePagination() {
+    monthSections.forEach((section, index) => {
+      const sectionPage = Math.floor(index / MONTHS_PER_PAGE);
+      const shouldShow = sectionPage === currentPage;
+      
+      // Also check filter
+      if (shouldShow && currentFilter !== 'all') {
+        const visibleCards = section.querySelectorAll(`.card[data-type="${currentFilter}"]:not([style*="display: none"])`);
+        section.style.display = visibleCards.length > 0 ? '' : 'none';
+      } else {
+        section.style.display = shouldShow ? '' : 'none';
+      }
+    });
+    
+    pageInfo.textContent = `${currentPage + 1} / ${maxPage + 1}`;
+    prevBtn.disabled = currentPage === 0;
+    nextBtn.disabled = currentPage >= maxPage;
+  }
+  
+  prevBtn?.addEventListener('click', () => {
+    if (currentPage > 0) {
+      currentPage--;
+      updatePagination();
+      document.getElementById('all-items')?.scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+  
+  nextBtn?.addEventListener('click', () => {
+    if (currentPage < maxPage) {
+      currentPage++;
+      updatePagination();
+      document.getElementById('all-items')?.scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+  
+  // Type filtering
+  function filterByType(type) {
+    currentFilter = type;
+    currentPage = 0;
     
     cards.forEach((card) => {
+      const cardType = card.getAttribute('data-type');
+      card.style.display = (type === 'all' || cardType === type) ? '' : 'none';
+    });
+    
+    updatePagination();
+  }
+  
+  document.getElementById('filter-paper')?.addEventListener('click', () => filterByType('paper'));
+  document.getElementById('filter-dev')?.addEventListener('click', () => filterByType('dev'));
+  document.getElementById('filter-news')?.addEventListener('click', () => filterByType('news'));
+  document.getElementById('filter-all')?.addEventListener('click', () => filterByType('all'));
+  
+  // Quick search
+  const searchInput = document.getElementById('quick-search');
+  const searchCount = document.getElementById('search-count');
+  const latestSection = document.getElementById('latest');
+  const allItemsSection = document.getElementById('all-items');
+  
+  searchInput?.addEventListener('input', (e) => {
+    const query = e.target.value.toLowerCase().trim();
+    
+    if (!query) {
+      cards.forEach(card => card.style.display = '');
+      searchCount?.classList.add('hidden');
+      latestSection.style.display = '';
+      currentPage = 0;
+      updatePagination();
+      return;
+    }
+    
+    // Hide latest section during search
+    latestSection.style.display = 'none';
+    
+    // Show all months during search
+    monthSections.forEach(s => s.style.display = '');
+    
+    let visibleCount = 0;
+    cards.forEach((card) => {
+      const text = (card.textContent || '').toLowerCase();
       const title = card.getAttribute('data-title') || '';
       const org = card.getAttribute('data-org') || '';
-      const text = card.textContent?.toLowerCase() || '';
-      const matches = title.includes(query) || org.includes(query) || text.includes(query);
-      (card as HTMLElement).style.display = matches ? '' : 'none';
+      const matches = text.includes(query) || title.includes(query) || org.includes(query);
+      card.style.display = matches ? '' : 'none';
+      if (matches) visibleCount++;
     });
     
     // Hide empty sections
-    sections.forEach((section) => {
-      const visibleCards = section.querySelectorAll('.card:not([style*="display: none"])');
-      (section as HTMLElement).style.display = visibleCards.length ? '' : 'none';
+    monthSections.forEach((section) => {
+      const visible = section.querySelectorAll('.card:not([style*="display: none"])');
+      section.style.display = visible.length > 0 ? '' : 'none';
     });
+    
+    searchCount.textContent = `${visibleCount}개 결과`;
+    searchCount?.classList.remove('hidden');
   });
   
-  // Filter functionality
-  const filterBtns = document.querySelectorAll('.filter-btn');
+  // Show more latest
+  const showMoreLatestBtn = document.getElementById('show-more-latest');
+  const latestGrid = document.getElementById('latest-grid');
   
-  filterBtns.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const filter = btn.getAttribute('data-filter');
-      
-      // Update active state
-      filterBtns.forEach((b) => {
-        b.classList.remove('active', 'bg-gray-900', 'text-white', 'dark:bg-white', 'dark:text-gray-900');
-        b.classList.add('bg-gray-100', 'dark:bg-gray-800');
-      });
-      btn.classList.add('active', 'bg-gray-900', 'text-white', 'dark:bg-white', 'dark:text-gray-900');
-      btn.classList.remove('bg-gray-100', 'dark:bg-gray-800');
-      
-      // Filter cards
-      cards.forEach((card) => {
-        const type = card.getAttribute('data-type');
-        const show = filter === 'all' || type === filter;
-        (card as HTMLElement).style.display = show ? '' : 'none';
-      });
-      
-      // Hide empty sections
-      sections.forEach((section) => {
-        const visibleCards = section.querySelectorAll('.card:not([style*="display: none"])');
-        (section as HTMLElement).style.display = visibleCards.length ? '' : 'none';
-      });
-    });
+  showMoreLatestBtn?.addEventListener('click', () => {
+    // This would need dynamic loading - for now just scroll to all items
+    document.getElementById('all-items')?.scrollIntoView({ behavior: 'smooth' });
   });
   
-  // Back to top button
+  // Back to top
   const backToTop = document.getElementById('back-to-top');
   
   window.addEventListener('scroll', () => {
@@ -207,4 +363,7 @@ const monthNames: Record<string, string> = {
   backToTop?.addEventListener('click', () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
+  
+  // Initialize
+  updatePagination();
 </script>
