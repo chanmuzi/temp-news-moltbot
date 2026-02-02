@@ -1,22 +1,11 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import ItemCard from '../components/ItemCard.astro';
 import itemsData from '../../../data/items.json';
 
-// Get all unique organizations
-const orgs = [...new Set(itemsData.items.map(i => i.org))].sort();
-
-// Get all items sorted
-const allItems = [...itemsData.items].sort((a, b) => {
-  const parseDate = (d: string) => {
-    const parts = d.split('-');
-    const year = parseInt(parts[0]) || 0;
-    const month = parseInt(parts[1]) || 0;
-    const week = parseInt(parts[2]?.replace('W', '')) || 0;
-    return year * 10000 + month * 100 + week;
-  };
-  return parseDate(b.date) - parseDate(a.date);
-});
+// Get all unique organizations sorted by frequency
+const orgCounts: Record<string, number> = {};
+itemsData.items.forEach(i => { orgCounts[i.org] = (orgCounts[i.org] || 0) + 1; });
+const orgs = Object.entries(orgCounts).sort((a, b) => b[1] - a[1]).map(e => e[0]);
 
 // Get unique years
 const years = [...new Set(itemsData.items.map(i => i.year))].sort().reverse();
@@ -27,195 +16,336 @@ const stats = itemsData.stats || {};
 
 <Layout title="검색 - NLP Paper News">
   <!-- Header -->
-  <section class="mb-8">
-    <div class="flex items-center gap-4 mb-4">
-      <a href={import.meta.env.BASE_URL} class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
-        ← 홈
+  <section class="mb-6">
+    <div class="flex items-center gap-3 mb-4">
+      <a href={import.meta.env.BASE_URL} class="text-sand-400 hover:text-claude-500 transition-colors text-sm">
+        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        홈
       </a>
     </div>
-    <h1 class="text-3xl font-bold mb-2">🔍 상세 검색</h1>
-    <p class="text-gray-600 dark:text-gray-400">
-      총 <span class="font-bold text-indigo-600">{itemsData.total_items.toLocaleString()}</span>개 항목에서 검색
+    <h1 class="text-2xl font-bold text-sand-800 dark:text-sand-100 mb-1">검색</h1>
+    <p class="text-sm text-sand-500 dark:text-sand-500">
+      총 <span class="font-semibold text-claude-600 dark:text-claude-400">{itemsData.total_items.toLocaleString()}</span>개 항목
     </p>
   </section>
 
-  <!-- Search Filters -->
-  <section class="bg-white dark:bg-gray-900 rounded-2xl border-2 border-gray-200 dark:border-gray-800 p-6 mb-8 shadow-sm">
-    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <div>
-        <label class="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">🔤 키워드</label>
-        <input
-          type="text"
-          id="keyword-input"
-          placeholder="검색어 입력..."
-          class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:border-indigo-500 dark:focus:border-indigo-400 outline-none transition-all"
-        />
-      </div>
-      
-      <div>
-        <label class="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">📂 타입</label>
-        <select id="type-select" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:border-indigo-500 outline-none transition-all">
-          <option value="">전체</option>
-          <option value="paper">📜 Paper ({stats.paper || 0})</option>
-          <option value="dev">🧑🏻‍💻 Dev ({stats.dev || 0})</option>
-          <option value="news">🗞️ News ({stats.news || 0})</option>
-        </select>
-      </div>
-      
-      <div>
-        <label class="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">📅 연도</label>
-        <select id="year-select" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:border-indigo-500 outline-none transition-all">
-          <option value="">전체</option>
-          {years.map((year) => (
-            <option value={year}>{year}년</option>
-          ))}
-        </select>
-      </div>
-      
-      <div>
-        <label class="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">🏢 기관</label>
-        <select id="org-select" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:border-indigo-500 outline-none transition-all">
-          <option value="">전체</option>
-          {orgs.slice(0, 150).map((org) => (
-            <option value={org.toLowerCase()}>{org}</option>
-          ))}
-        </select>
-      </div>
+  <!-- Search & Filters -->
+  <section class="bg-white dark:bg-anthro-darkSurface rounded-xl border border-sand-200 dark:border-sand-800 p-5 mb-6">
+    <!-- Keyword -->
+    <div class="relative mb-4">
+      <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-sand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      <input
+        type="text"
+        id="keyword-input"
+        placeholder="키워드, 논문 제목, 기관 검색..."
+        class="w-full pl-11 pr-4 py-3 rounded-lg border border-sand-200 dark:border-sand-700 bg-sand-50 dark:bg-anthro-darkMid text-sand-800 dark:text-sand-100 placeholder-sand-400 dark:placeholder-sand-600 focus:border-claude-500 dark:focus:border-claude-500 outline-none transition-all text-sm"
+      />
+      <span id="result-count" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-sand-400 dark:text-sand-600 font-mono hidden"></span>
     </div>
-    
-    <div class="mt-6 flex flex-wrap gap-3">
-      <button id="search-btn" class="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-bold hover:shadow-lg hover:shadow-indigo-500/25 transition-all">
-        🔍 검색
-      </button>
-      <button id="reset-btn" class="px-6 py-3 bg-gray-100 dark:bg-gray-800 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-all">
-        ↺ 초기화
+
+    <!-- Filter row -->
+    <div class="flex flex-wrap gap-2">
+      <select id="type-select" class="px-3 py-2 rounded-lg border border-sand-200 dark:border-sand-700 bg-sand-50 dark:bg-anthro-darkMid text-sand-700 dark:text-sand-300 text-sm outline-none focus:border-claude-500 transition-all">
+        <option value="">전체 타입</option>
+        <option value="paper">📜 Paper ({stats.paper || 0})</option>
+        <option value="dev">🧑🏻‍💻 Dev ({stats.dev || 0})</option>
+        <option value="news">🗞️ News ({stats.news || 0})</option>
+      </select>
+
+      <select id="year-select" class="px-3 py-2 rounded-lg border border-sand-200 dark:border-sand-700 bg-sand-50 dark:bg-anthro-darkMid text-sand-700 dark:text-sand-300 text-sm outline-none focus:border-claude-500 transition-all">
+        <option value="">전체 연도</option>
+        {years.map((year) => (
+          <option value={year}>{year}년</option>
+        ))}
+      </select>
+
+      <select id="org-select" class="px-3 py-2 rounded-lg border border-sand-200 dark:border-sand-700 bg-sand-50 dark:bg-anthro-darkMid text-sand-700 dark:text-sand-300 text-sm outline-none focus:border-claude-500 transition-all max-w-[200px]">
+        <option value="">전체 기관</option>
+        {orgs.slice(0, 200).map((org) => (
+          <option value={org}>{org} ({orgCounts[org]})</option>
+        ))}
+      </select>
+
+      <label class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-sand-200 dark:border-sand-700 bg-sand-50 dark:bg-anthro-darkMid text-sand-700 dark:text-sand-300 text-sm cursor-pointer hover:border-claude-400 transition-all">
+        <input type="checkbox" id="bookmark-filter" class="accent-claude-500 w-3.5 h-3.5" />
+        북마크만
+      </label>
+
+      <button id="reset-btn" class="px-3 py-2 text-sm text-sand-400 hover:text-claude-500 transition-colors">
+        초기화
       </button>
     </div>
   </section>
 
   <!-- Results -->
   <section>
-    <div class="flex items-center justify-between mb-6">
-      <h2 class="text-xl font-bold">검색 결과</h2>
-      <div class="flex items-center gap-3">
-        <span id="result-count" class="text-gray-500 bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full text-sm">
-          {allItems.length}개
-        </span>
-      </div>
+    <div id="results-grid" class="grid gap-3 md:grid-cols-2"></div>
+    <div id="no-results" class="hidden text-center py-20">
+      <div class="text-4xl mb-3 opacity-40">🔍</div>
+      <p class="text-sand-500 dark:text-sand-500">검색 결과가 없습니다</p>
+      <p class="text-xs text-sand-400 dark:text-sand-600 mt-1">다른 키워드로 검색해보세요</p>
     </div>
-    
-    <div id="results-grid" class="grid gap-4 md:grid-cols-2">
-      {allItems.slice(0, 50).map((item) => (
-        <div 
-          class="search-item" 
-          data-type={item.type} 
-          data-year={item.year} 
-          data-org={item.org.toLowerCase()} 
-          data-text={`${item.title} ${item.org} ${item.bullets.map(b => b.text).join(' ')}`.toLowerCase()}
-        >
-          <ItemCard {...item} showWeek={true} />
-        </div>
-      ))}
-    </div>
-    
-    <!-- Load more -->
-    <div id="load-more-container" class="text-center mt-8">
-      <button id="load-more-btn" class="px-8 py-3 bg-gray-100 dark:bg-gray-800 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-all">
-        더 보기 ({Math.max(0, allItems.length - 50)}개 더)
+    <div id="load-more-container" class="text-center mt-6 hidden">
+      <button id="load-more-btn" class="px-6 py-2.5 rounded-lg border border-sand-200 dark:border-sand-700 text-sm font-medium text-sand-600 dark:text-sand-400 hover:border-claude-400 hover:text-claude-500 transition-all">
+        더 보기
       </button>
-    </div>
-    
-    <div id="no-results" class="hidden text-center py-16">
-      <p class="text-6xl mb-4">🔍</p>
-      <p class="text-xl text-gray-500 dark:text-gray-400">검색 결과가 없습니다</p>
-      <p class="text-sm text-gray-400 dark:text-gray-500 mt-2">다른 키워드로 검색해보세요</p>
     </div>
   </section>
 </Layout>
 
-<script>
-  const keywordInput = document.getElementById('keyword-input') as HTMLInputElement;
-  const typeSelect = document.getElementById('type-select') as HTMLSelectElement;
-  const yearSelect = document.getElementById('year-select') as HTMLSelectElement;
-  const orgSelect = document.getElementById('org-select') as HTMLSelectElement;
-  const searchBtn = document.getElementById('search-btn');
-  const resetBtn = document.getElementById('reset-btn');
-  const resultCount = document.getElementById('result-count');
+<script define:vars={{ allItems: JSON.stringify(itemsData.items.sort((a: any, b: any) => {
+  const parseDate = (d: string) => {
+    const parts = d.split('-');
+    return (parseInt(parts[0]) || 0) * 10000 + (parseInt(parts[1]) || 0) * 100 + (parseInt(parts[2]?.replace('W', '')) || 0);
+  };
+  return parseDate(b.date) - parseDate(a.date);
+})) }}>
+
+  const items = JSON.parse(allItems);
+  const PER_PAGE = 40;
+  let displayCount = PER_PAGE;
+
+  const grid = document.getElementById('results-grid');
   const noResults = document.getElementById('no-results');
-  const resultsGrid = document.getElementById('results-grid');
-  const loadMoreBtn = document.getElementById('load-more-btn');
+  const resultCount = document.getElementById('result-count');
   const loadMoreContainer = document.getElementById('load-more-container');
-  const items = document.querySelectorAll('.search-item');
-  
-  let shownCount = 50;
-  
-  function search() {
+  const loadMoreBtn = document.getElementById('load-more-btn');
+  const keywordInput = document.getElementById('keyword-input');
+  const typeSelect = document.getElementById('type-select');
+  const yearSelect = document.getElementById('year-select');
+  const orgSelect = document.getElementById('org-select');
+  const bookmarkFilter = document.getElementById('bookmark-filter');
+
+  function getBookmarks() {
+    try { return JSON.parse(localStorage.getItem('bookmarks') || '[]'); }
+    catch { return []; }
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function highlightText(text, query) {
+    if (!query) return escapeHtml(text);
+    const escaped = escapeHtml(text);
+    const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(${escapedQuery})`, 'gi');
+    return escaped.replace(regex, '<mark class="search-highlight">$1</mark>');
+  }
+
+  function getFilteredItems() {
     const keyword = keywordInput.value.toLowerCase().trim();
     const type = typeSelect.value;
     const year = yearSelect.value;
     const org = orgSelect.value;
-    
-    let visibleCount = 0;
-    
-    items.forEach((item, index) => {
-      const el = item as HTMLElement;
-      const itemType = el.getAttribute('data-type') || '';
-      const itemYear = el.getAttribute('data-year') || '';
-      const itemOrg = el.getAttribute('data-org') || '';
-      const itemText = el.getAttribute('data-text') || '';
-      
-      const matchKeyword = !keyword || itemText.includes(keyword);
-      const matchType = !type || itemType === type;
-      const matchYear = !year || itemYear === year;
-      const matchOrg = !org || itemOrg.includes(org);
-      
-      const matchesFilter = matchKeyword && matchType && matchYear && matchOrg;
-      
-      // Show based on filter AND pagination
-      const show = matchesFilter && (keyword || visibleCount < shownCount);
-      el.style.display = show ? '' : 'none';
-      if (matchesFilter) visibleCount++;
+    const bookmarksOnly = bookmarkFilter.checked;
+    const bookmarks = getBookmarks();
+
+    return items.filter(item => {
+      if (type && item.type !== type) return false;
+      if (year && item.year !== year) return false;
+      if (org && item.org !== org) return false;
+      if (bookmarksOnly && !bookmarks.includes(item.id)) return false;
+      if (keyword) {
+        const searchText = `${item.title} ${item.org} ${item.bullets.map(b => b.text).join(' ')}`.toLowerCase();
+        if (!searchText.includes(keyword)) return false;
+      }
+      return true;
     });
-    
-    resultCount!.textContent = `${visibleCount}개`;
-    noResults!.classList.toggle('hidden', visibleCount > 0);
-    resultsGrid!.classList.toggle('hidden', visibleCount === 0);
-    
-    // Update load more button
-    const remaining = visibleCount - shownCount;
-    if (remaining > 0 && !keyword) {
-      loadMoreContainer!.classList.remove('hidden');
-      loadMoreBtn!.textContent = `더 보기 (${remaining}개 더)`;
-    } else {
-      loadMoreContainer!.classList.add('hidden');
-    }
   }
-  
-  searchBtn?.addEventListener('click', search);
-  keywordInput?.addEventListener('keyup', (e) => {
-    if (e.key === 'Enter') search();
+
+  function renderCard(item, query) {
+    const typeInfo = {
+      paper: { icon: '📜', label: 'Paper', color: 'text-blue-700 dark:text-blue-300', bgLight: 'bg-blue-50 border-blue-100', bgDark: 'dark:bg-blue-950/20 dark:border-blue-900/30', accent: 'bg-blue-500' },
+      dev: { icon: '🧑🏻‍💻', label: 'Dev', color: 'text-emerald-700 dark:text-emerald-300', bgLight: 'bg-emerald-50 border-emerald-100', bgDark: 'dark:bg-emerald-950/20 dark:border-emerald-900/30', accent: 'bg-emerald-500' },
+      news: { icon: '🗞️', label: 'News', color: 'text-violet-700 dark:text-violet-300', bgLight: 'bg-violet-50 border-violet-100', bgDark: 'dark:bg-violet-950/20 dark:border-violet-900/30', accent: 'bg-violet-500' },
+    };
+    const info = typeInfo[item.type] || typeInfo.paper;
+    const dateStr = item.year && item.month ? `${item.year}.${String(item.month).padStart(2, '0')} W${item.week || ''}` : '';
+    const bookmarks = getBookmarks();
+    const isBookmarked = bookmarks.includes(item.id);
+
+    const bulletsHtml = item.bullets.slice(0, 3).map(b => {
+      const cls = b.level > 1 ? 'ml-3 text-xs text-sand-500 dark:text-sand-500' : '';
+      const dotCls = b.level > 1 ? 'bg-sand-400 dark:bg-sand-600' : info.accent;
+      return `<li class="flex items-start gap-2 ${cls}"><span class="mt-[7px] w-1 h-1 rounded-full flex-shrink-0 ${dotCls}"></span><span>${highlightText(b.text, query)}</span></li>`;
+    }).join('');
+
+    const extraBullets = item.bullets.slice(3);
+    const extraHtml = extraBullets.length > 0 ? `
+      <div class="bullets-extra hidden">
+        <ul class="space-y-1.5 text-sm text-sand-600 dark:text-sand-400 leading-relaxed mt-1.5">
+          ${extraBullets.map(b => {
+            const cls = b.level > 1 ? 'ml-3 text-xs text-sand-500 dark:text-sand-500' : '';
+            const dotCls = b.level > 1 ? 'bg-sand-400 dark:bg-sand-600' : info.accent;
+            return `<li class="flex items-start gap-2 ${cls}"><span class="mt-[7px] w-1 h-1 rounded-full flex-shrink-0 ${dotCls}"></span><span>${highlightText(b.text, query)}</span></li>`;
+          }).join('')}
+        </ul>
+      </div>` : '';
+
+    const expandBtn = extraBullets.length > 0 ? `<button class="expand-btn text-xs text-sand-400 hover:text-claude-500 dark:text-sand-500 dark:hover:text-claude-400 transition-colors px-1.5 py-0.5 rounded">+${extraBullets.length}개 더 보기</button>` : '';
+
+    return `
+    <article class="item-card group relative rounded-xl border transition-all duration-200 hover:shadow-card-hover dark:hover:shadow-card-dark-hover ${info.bgLight} ${info.bgDark} animate-fade-in-up" data-id="${item.id}">
+      <div class="absolute top-0 left-0 w-1 h-full rounded-l-xl ${info.accent}"></div>
+      <div class="pl-4 pr-4 py-4">
+        <div class="flex items-center justify-between gap-2 mb-2.5">
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold ${info.color} bg-white/60 dark:bg-white/5">${info.icon} ${info.label}</span>
+            <span class="text-sm font-medium text-sand-600 dark:text-sand-400 truncate">${highlightText(item.org, query)}</span>
+          </div>
+          <span class="text-xs text-sand-400 dark:text-sand-600 font-mono flex-shrink-0">${dateStr}</span>
+        </div>
+        ${item.url
+          ? `<a href="${item.url}" target="_blank" rel="noopener noreferrer" class="block text-[15px] font-semibold text-sand-800 dark:text-sand-100 hover:text-claude-600 dark:hover:text-claude-400 transition-colors mb-2.5 leading-snug">${highlightText(item.title, query)}<svg class="inline-block w-3.5 h-3.5 ml-1 opacity-0 group-hover:opacity-60 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>`
+          : `<h3 class="text-[15px] font-semibold text-sand-800 dark:text-sand-100 mb-2.5 leading-snug">${highlightText(item.title, query)}</h3>`
+        }
+        ${item.bullets.length > 0 ? `<div class="bullets-container"><ul class="space-y-1.5 text-sm text-sand-600 dark:text-sand-400 leading-relaxed">${bulletsHtml}</ul>${extraHtml}</div>` : ''}
+        <div class="flex items-center justify-between mt-3 pt-2.5 border-t border-sand-200/50 dark:border-sand-800/30">
+          <div>${expandBtn}</div>
+          <div class="flex items-center gap-0.5">
+            <button class="bookmark-btn p-1.5 rounded-md ${isBookmarked ? 'text-claude-500 dark:text-claude-400' : 'text-sand-300 dark:text-sand-600'} hover:text-claude-500 dark:hover:text-claude-400 transition-colors" data-id="${item.id}" title="북마크">
+              <svg class="w-4 h-4 bookmark-icon-empty ${isBookmarked ? 'hidden' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+              <svg class="w-4 h-4 bookmark-icon-filled ${isBookmarked ? '' : 'hidden'}" fill="currentColor" viewBox="0 0 24 24"><path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+            </button>
+            <button class="share-btn p-1.5 rounded-md text-sand-300 hover:text-claude-500 dark:text-sand-600 dark:hover:text-claude-400 transition-colors" data-title="${escapeHtml(item.title)}" data-url="${item.url}" data-org="${escapeHtml(item.org)}" title="공유">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </article>`;
+  }
+
+  function render() {
+    const keyword = keywordInput.value.toLowerCase().trim();
+    const filtered = getFilteredItems();
+
+    resultCount.textContent = `${filtered.length}건`;
+    resultCount.classList.toggle('hidden', false);
+
+    if (filtered.length === 0) {
+      grid.innerHTML = '';
+      grid.classList.add('hidden');
+      noResults.classList.remove('hidden');
+      loadMoreContainer.classList.add('hidden');
+      return;
+    }
+
+    grid.classList.remove('hidden');
+    noResults.classList.add('hidden');
+
+    const toShow = filtered.slice(0, displayCount);
+    grid.innerHTML = toShow.map(item => renderCard(item, keyword)).join('');
+
+    // Load more
+    const remaining = filtered.length - displayCount;
+    if (remaining > 0) {
+      loadMoreContainer.classList.remove('hidden');
+      loadMoreBtn.textContent = `더 보기 (${remaining}건 남음)`;
+    } else {
+      loadMoreContainer.classList.add('hidden');
+    }
+
+    // Attach dynamic event listeners
+    attachCardListeners();
+  }
+
+  function attachCardListeners() {
+    // Expand buttons
+    grid.querySelectorAll('.expand-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const card = btn.closest('.item-card');
+        const extra = card?.querySelector('.bullets-extra');
+        if (!extra) return;
+        const isHidden = extra.classList.contains('hidden');
+        extra.classList.toggle('hidden');
+        btn.textContent = isHidden ? '접기' : `+${extra.querySelectorAll('li').length}개 더 보기`;
+      });
+    });
+
+    // Bookmark buttons
+    grid.querySelectorAll('.bookmark-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.id;
+        let bk = getBookmarks();
+        const idx = bk.indexOf(id);
+        const empty = btn.querySelector('.bookmark-icon-empty');
+        const filled = btn.querySelector('.bookmark-icon-filled');
+
+        if (idx >= 0) {
+          bk.splice(idx, 1);
+          empty?.classList.remove('hidden');
+          filled?.classList.add('hidden');
+          btn.classList.remove('text-claude-500', 'dark:text-claude-400');
+          btn.classList.add('text-sand-300', 'dark:text-sand-600');
+          showToast('북마크에서 제거되었습니다');
+        } else {
+          bk.push(id);
+          empty?.classList.add('hidden');
+          filled?.classList.remove('hidden');
+          btn.classList.add('text-claude-500', 'dark:text-claude-400');
+          btn.classList.remove('text-sand-300', 'dark:text-sand-600');
+          showToast('북마크에 추가되었습니다');
+        }
+        localStorage.setItem('bookmarks', JSON.stringify(bk));
+      });
+    });
+
+    // Share buttons
+    grid.querySelectorAll('.share-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const title = btn.dataset.title;
+        const url = btn.dataset.url;
+        const org = btn.dataset.org;
+        const text = `${title} (${org})`;
+        if (navigator.share) {
+          navigator.share({ title: text, url }).catch(() => {});
+        } else {
+          navigator.clipboard.writeText(`${text}\n${url}`).then(() => showToast('클립보드에 복사되었습니다'));
+        }
+      });
+    });
+  }
+
+  function showToast(msg) {
+    const existing = document.querySelector('.toast');
+    if (existing) existing.remove();
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+  }
+
+  // Event listeners
+  let debounceTimer;
+  keywordInput.addEventListener('input', () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => { displayCount = PER_PAGE; render(); }, 200);
   });
-  
-  // Real-time filter on select change
-  [typeSelect, yearSelect, orgSelect].forEach((el) => {
-    el?.addEventListener('change', search);
+
+  [typeSelect, yearSelect, orgSelect].forEach(el => {
+    el.addEventListener('change', () => { displayCount = PER_PAGE; render(); });
   });
-  
-  // Load more
-  loadMoreBtn?.addEventListener('click', () => {
-    shownCount += 50;
-    search();
+
+  bookmarkFilter.addEventListener('change', () => { displayCount = PER_PAGE; render(); });
+
+  loadMoreBtn.addEventListener('click', () => {
+    displayCount += PER_PAGE;
+    render();
   });
-  
-  resetBtn?.addEventListener('click', () => {
+
+  document.getElementById('reset-btn').addEventListener('click', () => {
     keywordInput.value = '';
     typeSelect.value = '';
     yearSelect.value = '';
     orgSelect.value = '';
-    shownCount = 50;
-    search();
+    bookmarkFilter.checked = false;
+    displayCount = PER_PAGE;
+    render();
   });
-  
-  // Initial load
-  search();
+
+  // Initial render
+  render();
 </script>

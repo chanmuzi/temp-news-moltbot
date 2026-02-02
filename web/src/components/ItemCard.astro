@@ -21,100 +21,152 @@ interface Props {
 
 const { id, type, org, title, url, bullets, date, year, month, week, tags = [], showWeek = false } = Astro.props;
 
-const typeInfo: Record<string, { icon: string; label: string; gradient: string; bg: string }> = {
-  paper: { 
-    icon: '📜', 
-    label: 'Paper', 
-    gradient: 'from-blue-500 to-cyan-500',
-    bg: 'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800'
+const typeInfo: Record<string, { icon: string; label: string; color: string; bgLight: string; bgDark: string; accent: string }> = {
+  paper: {
+    icon: '📜',
+    label: 'Paper',
+    color: 'text-blue-700 dark:text-blue-300',
+    bgLight: 'bg-blue-50 border-blue-100',
+    bgDark: 'dark:bg-blue-950/20 dark:border-blue-900/30',
+    accent: 'bg-blue-500',
   },
-  dev: { 
-    icon: '🧑🏻‍💻', 
-    label: 'Dev', 
-    gradient: 'from-green-500 to-emerald-500',
-    bg: 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800'
+  dev: {
+    icon: '🧑🏻‍💻',
+    label: 'Dev',
+    color: 'text-emerald-700 dark:text-emerald-300',
+    bgLight: 'bg-emerald-50 border-emerald-100',
+    bgDark: 'dark:bg-emerald-950/20 dark:border-emerald-900/30',
+    accent: 'bg-emerald-500',
   },
-  news: { 
-    icon: '🗞️', 
-    label: 'News', 
-    gradient: 'from-purple-500 to-pink-500',
-    bg: 'bg-purple-50 dark:bg-purple-950/30 border-purple-200 dark:border-purple-800'
+  news: {
+    icon: '🗞️',
+    label: 'News',
+    color: 'text-violet-700 dark:text-violet-300',
+    bgLight: 'bg-violet-50 border-violet-100',
+    bgDark: 'dark:bg-violet-950/20 dark:border-violet-900/30',
+    accent: 'bg-violet-500',
   },
 };
 
 const info = typeInfo[type] || typeInfo.paper;
-
-// Format week display
-const weekDisplay = week ? `${week}주차` : '';
-const dateDisplay = showWeek && year && month ? `${year}.${month.padStart(2, '0')} ${weekDisplay}` : '';
+const weekDisplay = week ? `W${week}` : '';
+const dateDisplay = showWeek && year && month ? `${year}.${String(month).padStart(2, '0')} ${weekDisplay}` : '';
+const hasMoreBullets = bullets.length > 3;
 ---
 
-<article 
-  class={`card group relative overflow-hidden rounded-2xl border-2 ${info.bg} p-5 hover:shadow-xl hover:shadow-${type === 'paper' ? 'blue' : type === 'dev' ? 'green' : 'purple'}-500/10 transition-all duration-300 hover:-translate-y-1`}
-  data-type={type} 
-  data-org={org.toLowerCase()} 
+<article
+  class={`item-card group relative rounded-xl border transition-all duration-200 hover:shadow-card-hover dark:hover:shadow-card-dark-hover ${info.bgLight} ${info.bgDark}`}
+  data-type={type}
+  data-org={org.toLowerCase()}
   data-title={title.toLowerCase()}
+  data-id={id}
 >
-  <!-- Type indicator bar -->
-  <div class={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${info.gradient}`}></div>
-  
-  <div class="flex flex-col h-full">
-    <!-- Header -->
-    <div class="flex items-start justify-between gap-3 mb-3">
-      <div class="flex items-center gap-2 flex-wrap">
-        <span class={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-gradient-to-r ${info.gradient} text-white text-xs font-bold shadow-sm`}>
+  <!-- Left accent bar -->
+  <div class={`absolute top-0 left-0 w-1 h-full rounded-l-xl ${info.accent}`}></div>
+
+  <div class="pl-4 pr-4 py-4">
+    <!-- Header row -->
+    <div class="flex items-center justify-between gap-2 mb-2.5">
+      <div class="flex items-center gap-2 min-w-0">
+        <span class={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold ${info.color} bg-white/60 dark:bg-white/5`}>
           {info.icon} {info.label}
         </span>
-        <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">
+        <span class="text-sm font-medium text-sand-600 dark:text-sand-400 truncate">
           {org}
         </span>
       </div>
-      {dateDisplay && (
-        <span class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-md">
-          {dateDisplay}
-        </span>
-      )}
+      <div class="flex items-center gap-1 flex-shrink-0">
+        {dateDisplay && (
+          <span class="text-xs text-sand-400 dark:text-sand-600 font-mono">
+            {dateDisplay}
+          </span>
+        )}
+      </div>
     </div>
-    
+
     <!-- Title -->
     {url ? (
-      <a 
-        href={url} 
-        target="_blank" 
+      <a
+        href={url}
+        target="_blank"
         rel="noopener noreferrer"
-        class="block text-lg font-bold text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors mb-3 line-clamp-2 leading-snug"
+        class="block text-[15px] font-semibold text-sand-800 dark:text-sand-100 hover:text-claude-600 dark:hover:text-claude-400 transition-colors mb-2.5 leading-snug"
       >
         {title}
-        <span class="inline-block ml-1 opacity-0 group-hover:opacity-100 transition-opacity text-indigo-500">↗</span>
+        <svg class="inline-block w-3.5 h-3.5 ml-1 opacity-0 group-hover:opacity-60 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
       </a>
     ) : (
-      <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-3 line-clamp-2 leading-snug">
+      <h3 class="text-[15px] font-semibold text-sand-800 dark:text-sand-100 mb-2.5 leading-snug">
         {title}
       </h3>
     )}
-    
+
     <!-- Bullets -->
     {bullets.length > 0 && (
-      <ul class="flex-1 space-y-2 text-sm text-gray-600 dark:text-gray-300">
-        {bullets.slice(0, 3).map((bullet) => (
-          <li class={`flex items-start gap-2 ${bullet.level > 1 ? 'ml-4 text-gray-500 dark:text-gray-400 text-xs' : ''}`}>
-            <span class={`mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0 ${bullet.level > 1 ? 'bg-gray-400' : `bg-gradient-to-r ${info.gradient}`}`}></span>
-            <span class="line-clamp-2 leading-relaxed">{bullet.text}</span>
-          </li>
-        ))}
-        {bullets.length > 3 && (
-          <li class="text-xs text-gray-400 dark:text-gray-500 ml-3.5 italic">
-            +{bullets.length - 3}개 더...
-          </li>
+      <div class="bullets-container">
+        <ul class="space-y-1.5 text-sm text-sand-600 dark:text-sand-400 leading-relaxed">
+          {bullets.slice(0, 3).map((bullet) => (
+            <li class={`flex items-start gap-2 ${bullet.level > 1 ? 'ml-3 text-xs text-sand-500 dark:text-sand-500' : ''}`}>
+              <span class={`mt-[7px] w-1 h-1 rounded-full flex-shrink-0 ${bullet.level > 1 ? 'bg-sand-400 dark:bg-sand-600' : info.accent}`}></span>
+              <span>{bullet.text}</span>
+            </li>
+          ))}
+        </ul>
+        {hasMoreBullets && (
+          <div class="bullets-extra hidden">
+            <ul class="space-y-1.5 text-sm text-sand-600 dark:text-sand-400 leading-relaxed mt-1.5">
+              {bullets.slice(3).map((bullet) => (
+                <li class={`flex items-start gap-2 ${bullet.level > 1 ? 'ml-3 text-xs text-sand-500 dark:text-sand-500' : ''}`}>
+                  <span class={`mt-[7px] w-1 h-1 rounded-full flex-shrink-0 ${bullet.level > 1 ? 'bg-sand-400 dark:bg-sand-600' : info.accent}`}></span>
+                  <span>{bullet.text}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
-      </ul>
+      </div>
     )}
-    
+
+    <!-- Action bar -->
+    <div class="flex items-center justify-between mt-3 pt-2.5 border-t border-sand-200/50 dark:border-sand-800/30">
+      <div class="flex items-center gap-1">
+        {hasMoreBullets && (
+          <button
+            class="expand-btn text-xs text-sand-400 hover:text-claude-500 dark:text-sand-500 dark:hover:text-claude-400 transition-colors px-1.5 py-0.5 rounded"
+            data-id={id}
+          >
+            +{bullets.length - 3}개 더 보기
+          </button>
+        )}
+      </div>
+      <div class="flex items-center gap-0.5">
+        <!-- Bookmark button -->
+        <button
+          class="bookmark-btn p-1.5 rounded-md text-sand-300 hover:text-claude-500 dark:text-sand-600 dark:hover:text-claude-400 transition-colors"
+          data-id={id}
+          title="북마크"
+        >
+          <svg class="w-4 h-4 bookmark-icon-empty" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+          <svg class="w-4 h-4 bookmark-icon-filled hidden" fill="currentColor" viewBox="0 0 24 24"><path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+        </button>
+        <!-- Share button -->
+        <button
+          class="share-btn p-1.5 rounded-md text-sand-300 hover:text-claude-500 dark:text-sand-600 dark:hover:text-claude-400 transition-colors"
+          data-title={title}
+          data-url={url}
+          data-org={org}
+          title="공유"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+        </button>
+      </div>
+    </div>
+
     <!-- Tags -->
     {tags.length > 0 && (
-      <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 flex flex-wrap gap-1.5">
+      <div class="flex flex-wrap gap-1.5 mt-2">
         {tags.map((tag) => (
-          <span class="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-md">
+          <span class="text-xs px-2 py-0.5 bg-sand-100 dark:bg-sand-800 text-sand-500 dark:text-sand-500 rounded-md">
             #{tag}
           </span>
         ))}
@@ -122,3 +174,104 @@ const dateDisplay = showWeek && year && month ? `${year}.${month.padStart(2, '0'
     )}
   </div>
 </article>
+
+<script>
+  // Expand/collapse bullets
+  document.querySelectorAll('.expand-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const card = btn.closest('.item-card');
+      const extra = card?.querySelector('.bullets-extra');
+      if (!extra) return;
+
+      const isHidden = extra.classList.contains('hidden');
+      extra.classList.toggle('hidden');
+      btn.textContent = isHidden ? '접기' : `+${extra.querySelectorAll('li').length}개 더 보기`;
+    });
+  });
+
+  // Bookmark functionality (localStorage)
+  function getBookmarks(): string[] {
+    try {
+      return JSON.parse(localStorage.getItem('bookmarks') || '[]');
+    } catch { return []; }
+  }
+
+  function saveBookmarks(ids: string[]) {
+    localStorage.setItem('bookmarks', JSON.stringify(ids));
+  }
+
+  function updateBookmarkUI(btn: Element, isBookmarked: boolean) {
+    const empty = btn.querySelector('.bookmark-icon-empty');
+    const filled = btn.querySelector('.bookmark-icon-filled');
+    if (isBookmarked) {
+      empty?.classList.add('hidden');
+      filled?.classList.remove('hidden');
+      btn.classList.add('text-claude-500', 'dark:text-claude-400');
+      btn.classList.remove('text-sand-300', 'dark:text-sand-600');
+    } else {
+      empty?.classList.remove('hidden');
+      filled?.classList.add('hidden');
+      btn.classList.remove('text-claude-500', 'dark:text-claude-400');
+      btn.classList.add('text-sand-300', 'dark:text-sand-600');
+    }
+  }
+
+  // Initialize bookmarks
+  const bookmarks = getBookmarks();
+  document.querySelectorAll('.bookmark-btn').forEach((btn) => {
+    const id = (btn as HTMLElement).dataset.id || '';
+    if (bookmarks.includes(id)) {
+      updateBookmarkUI(btn, true);
+    }
+
+    btn.addEventListener('click', () => {
+      const currentBookmarks = getBookmarks();
+      const itemId = (btn as HTMLElement).dataset.id || '';
+      const idx = currentBookmarks.indexOf(itemId);
+
+      if (idx >= 0) {
+        currentBookmarks.splice(idx, 1);
+        updateBookmarkUI(btn, false);
+        showToast('북마크에서 제거되었습니다');
+      } else {
+        currentBookmarks.push(itemId);
+        updateBookmarkUI(btn, true);
+        showToast('북마크에 추가되었습니다');
+      }
+      saveBookmarks(currentBookmarks);
+    });
+  });
+
+  // Share functionality
+  document.querySelectorAll('.share-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const el = btn as HTMLElement;
+      const title = el.dataset.title || '';
+      const url = el.dataset.url || '';
+      const org = el.dataset.org || '';
+
+      const text = `${title} (${org})`;
+
+      if (navigator.share) {
+        navigator.share({ title: text, url }).catch(() => {});
+      } else {
+        // Fallback: copy to clipboard
+        navigator.clipboard.writeText(`${text}\n${url}`).then(() => {
+          showToast('클립보드에 복사되었습니다');
+        });
+      }
+    });
+  });
+
+  // Toast helper
+  function showToast(message: string) {
+    const existing = document.querySelector('.toast');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+  }
+</script>
