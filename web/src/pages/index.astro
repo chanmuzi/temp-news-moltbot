@@ -1,0 +1,210 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ItemCard from '../components/ItemCard.astro';
+import itemsData from '../../../data/items.json';
+
+// Sort items by date (newest first)
+const sortedItems = [...itemsData.items].sort((a, b) => {
+  // Parse date format: "2026-02-W01" -> comparable value
+  const parseDate = (d: string) => {
+    const [year, rest] = d.split('-');
+    const month = rest?.replace('W', '') || '01';
+    return parseInt(year) * 100 + parseInt(month);
+  };
+  return parseDate(b.date) - parseDate(a.date);
+});
+
+// Group items by year and month
+const grouped = sortedItems.reduce((acc, item) => {
+  const key = `${item.year}-${item.month}`;
+  if (!acc[key]) {
+    acc[key] = { year: item.year, month: item.month, items: [] };
+  }
+  acc[key].items.push(item);
+  return acc;
+}, {} as Record<string, { year: string; month: string; items: typeof sortedItems }>);
+
+const groups = Object.values(grouped).sort((a, b) => {
+  const aVal = parseInt(a.year) * 100 + parseInt(a.month);
+  const bVal = parseInt(b.year) * 100 + parseInt(b.month);
+  return bVal - aVal;
+});
+
+// Get latest items for hero section
+const latestItems = sortedItems.slice(0, 6);
+
+// Stats
+const totalItems = itemsData.total_items;
+const paperCount = sortedItems.filter(i => i.type === 'paper').length;
+const devCount = sortedItems.filter(i => i.type === 'dev').length;
+
+const monthNames: Record<string, string> = {
+  '1': '1월', '2': '2월', '3': '3월', '4': '4월',
+  '5': '5월', '6': '6월', '7': '7월', '8': '8월',
+  '9': '9월', '10': '10월', '11': '11월', '12': '12월',
+};
+---
+
+<Layout title="NLP Paper News - AI 논문 & 뉴스 큐레이션">
+  <!-- Hero Section -->
+  <section class="text-center mb-12">
+    <h1 class="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">
+      NLP Paper News
+    </h1>
+    <p class="text-lg text-gray-600 dark:text-gray-400 mb-6">
+      AI, NLP, ML 분야의 최신 논문과 뉴스를 큐레이션합니다
+    </p>
+    
+    <!-- Stats -->
+    <div class="flex justify-center gap-8 text-center">
+      <div>
+        <div class="text-3xl font-bold text-primary-600">{totalItems.toLocaleString()}</div>
+        <div class="text-sm text-gray-500">전체 항목</div>
+      </div>
+      <div>
+        <div class="text-3xl font-bold text-blue-600">{paperCount.toLocaleString()}</div>
+        <div class="text-sm text-gray-500">📜 Papers</div>
+      </div>
+      <div>
+        <div class="text-3xl font-bold text-green-600">{devCount.toLocaleString()}</div>
+        <div class="text-sm text-gray-500">🧑🏻‍💻 Dev</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Search Box -->
+  <section class="mb-8">
+    <div class="relative max-w-2xl mx-auto">
+      <input
+        type="text"
+        id="search-input"
+        placeholder="논문, 기관, 키워드 검색..."
+        class="w-full px-4 py-3 pl-12 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+      />
+      <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
+    </div>
+  </section>
+
+  <!-- Filter Buttons -->
+  <section class="mb-8 flex flex-wrap justify-center gap-2">
+    <button data-filter="all" class="filter-btn active px-4 py-2 rounded-lg bg-gray-900 text-white dark:bg-white dark:text-gray-900 font-medium transition-all">
+      전체
+    </button>
+    <button data-filter="paper" class="filter-btn px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 font-medium transition-all">
+      📜 Paper
+    </button>
+    <button data-filter="dev" class="filter-btn px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 font-medium transition-all">
+      🧑🏻‍💻 Dev
+    </button>
+    <button data-filter="news" class="filter-btn px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 font-medium transition-all">
+      🗞️ News
+    </button>
+  </section>
+
+  <!-- Latest Section -->
+  <section class="mb-12">
+    <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+      <span class="text-2xl">🔥</span> 최신 항목
+    </h2>
+    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3" id="latest-grid">
+      {latestItems.map((item) => (
+        <ItemCard {...item} />
+      ))}
+    </div>
+  </section>
+
+  <!-- All Items by Month -->
+  <section id="all-items">
+    {groups.map((group) => (
+      <div class="mb-12 month-section" data-year={group.year} data-month={group.month}>
+        <h2 class="text-xl font-bold mb-4 sticky top-16 bg-gray-50/90 dark:bg-gray-950/90 backdrop-blur-sm py-2 z-10 border-b border-gray-200 dark:border-gray-800">
+          📅 {group.year}년 {monthNames[group.month] || group.month}
+          <span class="text-sm font-normal text-gray-500 ml-2">({group.items.length}개)</span>
+        </h2>
+        <div class="grid gap-4 md:grid-cols-2 items-grid">
+          {group.items.map((item) => (
+            <ItemCard {...item} />
+          ))}
+        </div>
+      </div>
+    ))}
+  </section>
+  
+  <!-- Back to top -->
+  <button 
+    id="back-to-top"
+    class="fixed bottom-8 right-8 p-3 bg-primary-600 text-white rounded-full shadow-lg opacity-0 pointer-events-none transition-all hover:bg-primary-700"
+  >
+    ↑
+  </button>
+</Layout>
+
+<script>
+  // Search functionality
+  const searchInput = document.getElementById('search-input') as HTMLInputElement;
+  const cards = document.querySelectorAll('.card');
+  const sections = document.querySelectorAll('.month-section');
+  
+  searchInput?.addEventListener('input', (e) => {
+    const query = (e.target as HTMLInputElement).value.toLowerCase();
+    
+    cards.forEach((card) => {
+      const title = card.getAttribute('data-title') || '';
+      const org = card.getAttribute('data-org') || '';
+      const text = card.textContent?.toLowerCase() || '';
+      const matches = title.includes(query) || org.includes(query) || text.includes(query);
+      (card as HTMLElement).style.display = matches ? '' : 'none';
+    });
+    
+    // Hide empty sections
+    sections.forEach((section) => {
+      const visibleCards = section.querySelectorAll('.card:not([style*="display: none"])');
+      (section as HTMLElement).style.display = visibleCards.length ? '' : 'none';
+    });
+  });
+  
+  // Filter functionality
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  
+  filterBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const filter = btn.getAttribute('data-filter');
+      
+      // Update active state
+      filterBtns.forEach((b) => {
+        b.classList.remove('active', 'bg-gray-900', 'text-white', 'dark:bg-white', 'dark:text-gray-900');
+        b.classList.add('bg-gray-100', 'dark:bg-gray-800');
+      });
+      btn.classList.add('active', 'bg-gray-900', 'text-white', 'dark:bg-white', 'dark:text-gray-900');
+      btn.classList.remove('bg-gray-100', 'dark:bg-gray-800');
+      
+      // Filter cards
+      cards.forEach((card) => {
+        const type = card.getAttribute('data-type');
+        const show = filter === 'all' || type === filter;
+        (card as HTMLElement).style.display = show ? '' : 'none';
+      });
+      
+      // Hide empty sections
+      sections.forEach((section) => {
+        const visibleCards = section.querySelectorAll('.card:not([style*="display: none"])');
+        (section as HTMLElement).style.display = visibleCards.length ? '' : 'none';
+      });
+    });
+  });
+  
+  // Back to top button
+  const backToTop = document.getElementById('back-to-top');
+  
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 500) {
+      backToTop?.classList.remove('opacity-0', 'pointer-events-none');
+    } else {
+      backToTop?.classList.add('opacity-0', 'pointer-events-none');
+    }
+  });
+  
+  backToTop?.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+</script>

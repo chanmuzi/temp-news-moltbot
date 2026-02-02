@@ -1,0 +1,87 @@
+---
+interface Bullet {
+  text: string;
+  level: number;
+}
+
+interface Props {
+  id: string;
+  type: string;
+  org: string;
+  title: string;
+  url: string;
+  bullets: Bullet[];
+  date: string;
+  tags?: string[];
+}
+
+const { id, type, org, title, url, bullets, date, tags = [] } = Astro.props;
+
+const typeInfo = {
+  paper: { icon: '📜', label: 'Paper', class: 'badge-paper' },
+  dev: { icon: '🧑🏻‍💻', label: 'Dev', class: 'badge-dev' },
+  news: { icon: '🗞️', label: 'News', class: 'badge-news' },
+};
+
+const info = typeInfo[type as keyof typeof typeInfo] || typeInfo.paper;
+---
+
+<article class="card group" data-type={type} data-org={org.toLowerCase()} data-title={title.toLowerCase()}>
+  <div class="flex items-start justify-between gap-4">
+    <div class="flex-1 min-w-0">
+      <div class="flex items-center gap-2 mb-2 flex-wrap">
+        <span class={`badge ${info.class}`}>
+          {info.icon} {info.label}
+        </span>
+        <span class="text-sm text-gray-500 dark:text-gray-400 font-medium">
+          {org}
+        </span>
+        <span class="text-xs text-gray-400 dark:text-gray-500">
+          {date}
+        </span>
+      </div>
+      
+      {url ? (
+        <a 
+          href={url} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          class="text-lg font-semibold text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition-colors line-clamp-2"
+        >
+          {title}
+          <span class="inline-block ml-1 opacity-0 group-hover:opacity-100 transition-opacity">↗</span>
+        </a>
+      ) : (
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2">
+          {title}
+        </h3>
+      )}
+      
+      {bullets.length > 0 && (
+        <ul class="mt-3 space-y-1.5 text-sm text-gray-600 dark:text-gray-300">
+          {bullets.slice(0, 4).map((bullet) => (
+            <li class={`flex items-start gap-2 ${bullet.level > 1 ? 'ml-4 text-gray-500 dark:text-gray-400' : ''}`}>
+              <span class="text-gray-400 mt-0.5">{bullet.level > 1 ? '↳' : '•'}</span>
+              <span class="line-clamp-2">{bullet.text}</span>
+            </li>
+          ))}
+          {bullets.length > 4 && (
+            <li class="text-gray-400 dark:text-gray-500 text-xs ml-4">
+              +{bullets.length - 4} more...
+            </li>
+          )}
+        </ul>
+      )}
+      
+      {tags.length > 0 && (
+        <div class="mt-3 flex flex-wrap gap-1">
+          {tags.map((tag) => (
+            <span class="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded">
+              #{tag}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  </div>
+</article>

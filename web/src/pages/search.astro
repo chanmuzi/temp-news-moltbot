@@ -1,0 +1,162 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ItemCard from '../components/ItemCard.astro';
+import itemsData from '../../../data/items.json';
+
+// Get all unique organizations
+const orgs = [...new Set(itemsData.items.map(i => i.org))].sort();
+
+// Get all items sorted
+const allItems = [...itemsData.items].sort((a, b) => {
+  const parseDate = (d: string) => {
+    const [year, rest] = d.split('-');
+    const month = rest?.replace('W', '') || '01';
+    return parseInt(year) * 100 + parseInt(month);
+  };
+  return parseDate(b.date) - parseDate(a.date);
+});
+
+// Get unique years
+const years = [...new Set(itemsData.items.map(i => i.year))].sort().reverse();
+---
+
+<Layout title="검색 - NLP Paper News">
+  <section class="mb-8">
+    <h1 class="text-3xl font-bold mb-2">🔍 상세 검색</h1>
+    <p class="text-gray-600 dark:text-gray-400">총 {itemsData.total_items.toLocaleString()}개 항목에서 검색</p>
+  </section>
+
+  <!-- Advanced Search -->
+  <section class="card mb-8">
+    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div>
+        <label class="block text-sm font-medium mb-2">키워드</label>
+        <input
+          type="text"
+          id="keyword-input"
+          placeholder="검색어 입력..."
+          class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary-500 outline-none"
+        />
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium mb-2">타입</label>
+        <select id="type-select" class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary-500 outline-none">
+          <option value="">전체</option>
+          <option value="paper">📜 Paper</option>
+          <option value="dev">🧑🏻‍💻 Dev</option>
+          <option value="news">🗞️ News</option>
+        </select>
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium mb-2">연도</label>
+        <select id="year-select" class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary-500 outline-none">
+          <option value="">전체</option>
+          {years.map((year) => (
+            <option value={year}>{year}년</option>
+          ))}
+        </select>
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium mb-2">기관</label>
+        <select id="org-select" class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary-500 outline-none">
+          <option value="">전체</option>
+          {orgs.slice(0, 100).map((org) => (
+            <option value={org.toLowerCase()}>{org}</option>
+          ))}
+        </select>
+      </div>
+    </div>
+    
+    <div class="mt-4 flex gap-2">
+      <button id="search-btn" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium">
+        검색
+      </button>
+      <button id="reset-btn" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-medium">
+        초기화
+      </button>
+    </div>
+  </section>
+
+  <!-- Results -->
+  <section>
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-xl font-bold">검색 결과</h2>
+      <span id="result-count" class="text-gray-500">{allItems.length}개</span>
+    </div>
+    
+    <div id="results-grid" class="grid gap-4 md:grid-cols-2">
+      {allItems.map((item) => (
+        <div class="search-item" data-type={item.type} data-year={item.year} data-org={item.org.toLowerCase()} data-text={`${item.title} ${item.org} ${item.bullets.map(b => b.text).join(' ')}`.toLowerCase()}>
+          <ItemCard {...item} />
+        </div>
+      ))}
+    </div>
+    
+    <div id="no-results" class="hidden text-center py-12 text-gray-500">
+      <p class="text-4xl mb-4">🔍</p>
+      <p>검색 결과가 없습니다</p>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const keywordInput = document.getElementById('keyword-input') as HTMLInputElement;
+  const typeSelect = document.getElementById('type-select') as HTMLSelectElement;
+  const yearSelect = document.getElementById('year-select') as HTMLSelectElement;
+  const orgSelect = document.getElementById('org-select') as HTMLSelectElement;
+  const searchBtn = document.getElementById('search-btn');
+  const resetBtn = document.getElementById('reset-btn');
+  const resultCount = document.getElementById('result-count');
+  const noResults = document.getElementById('no-results');
+  const items = document.querySelectorAll('.search-item');
+  
+  function search() {
+    const keyword = keywordInput.value.toLowerCase();
+    const type = typeSelect.value;
+    const year = yearSelect.value;
+    const org = orgSelect.value;
+    
+    let visibleCount = 0;
+    
+    items.forEach((item) => {
+      const el = item as HTMLElement;
+      const itemType = el.getAttribute('data-type') || '';
+      const itemYear = el.getAttribute('data-year') || '';
+      const itemOrg = el.getAttribute('data-org') || '';
+      const itemText = el.getAttribute('data-text') || '';
+      
+      const matchKeyword = !keyword || itemText.includes(keyword);
+      const matchType = !type || itemType === type;
+      const matchYear = !year || itemYear === year;
+      const matchOrg = !org || itemOrg.includes(org);
+      
+      const show = matchKeyword && matchType && matchYear && matchOrg;
+      el.style.display = show ? '' : 'none';
+      if (show) visibleCount++;
+    });
+    
+    resultCount!.textContent = `${visibleCount}개`;
+    noResults!.classList.toggle('hidden', visibleCount > 0);
+  }
+  
+  searchBtn?.addEventListener('click', search);
+  keywordInput?.addEventListener('keyup', (e) => {
+    if (e.key === 'Enter') search();
+  });
+  
+  // Real-time search on select change
+  [typeSelect, yearSelect, orgSelect].forEach((el) => {
+    el?.addEventListener('change', search);
+  });
+  
+  resetBtn?.addEventListener('click', () => {
+    keywordInput.value = '';
+    typeSelect.value = '';
+    yearSelect.value = '';
+    orgSelect.value = '';
+    search();
+  });
+</script>
