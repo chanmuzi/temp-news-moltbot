@@ -18,6 +18,21 @@ export default {
           800: '#7D3A24',
           900: '#5C2A1A',
         },
+        // Warm gray scale matching Anthropic aesthetic
+        // Overrides Tailwind's cool blue-tinted grays
+        gray: {
+          50: '#FAFAF8',
+          100: '#F3F2EE',
+          200: '#E5E3DE',
+          300: '#D0CEC7',
+          400: '#9A9890',
+          500: '#706E66',
+          600: '#56544D',
+          700: '#3D3B35',
+          800: '#2A2924',
+          900: '#1A1915',
+          950: '#0E0E0B',
+        },
         sand: {
           50: '#FAFAF8',
           100: '#F5F4F0',
