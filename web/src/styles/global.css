@@ -9,6 +9,10 @@
 
   body {
     @apply bg-anthro-bg text-gray-800;
+    font-weight: 430;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
   .dark body,
