@@ -1,14 +1,44 @@
 {
   "version": 2,
-  "last_updated": "2026-02-02T16:59:40.086Z",
-  "total_items": 1650,
+  "last_updated": "2026-02-03T04:12:20.473Z",
+  "total_items": 1651,
   "stats": {
-    "total": 1650,
+    "total": 1651,
     "paper": 1015,
-    "dev": 614,
+    "dev": 615,
     "news": 21
   },
   "items": [
+    {
+      "id": "moltbook-moltbook-operates-as-an-openclaw-skill-where-agents-create-forums-and-content-without-human",
+      "type": "dev",
+      "org": "Moltbook",
+      "title": "Moltbook operates as an OpenClaw skill where agents create forums and content without human coordination",
+      "url": "https://www.moltbook.com/",
+      "date": "2026-02-W01",
+      "year": "2026",
+      "month": "2",
+      "week": "1",
+      "bullets": [
+        {
+          "text": "화제의 비서 AI. OS 위에서 거의 대부분의 권한을 갖고 자동적으로 업무 처리",
+          "level": 1
+        },
+        {
+          "text": "텔레그램, 디스코드, 슬랙 등으로 메세지를 보내 업무를 지시할 수 있음",
+          "level": 1
+        },
+        {
+          "text": "보안 이슈가 심각해서 cloudflare 측에서 발빠르게 자사 vm에 hosting 할 수 있는 레포 공개함",
+          "level": 1
+        },
+        {
+          "text": "실제 사용해보니 제대로 working 하지 않음",
+          "level": 2
+        }
+      ],
+      "tags": []
+    },
     {
       "id": "kaggle-product-launch-introducing-community-benchmarks",
       "date": "2026-02-W01",
