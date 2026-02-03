@@ -82,18 +82,21 @@ const monthNames: Record<string, string> = {
 const MONTHS_PER_PAGE = 3;
 ---
 
-<Layout title="NLP Paper News - AI 논문 & 뉴스 큐레이션">
+<Layout title="chanmuzi - AI 논문 & 뉴스 큐레이션">
   <!-- Hero Section -->
   <section class="mb-10">
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
-      <div>
-        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2 leading-tight">
-          AI 논문 & 뉴스
-          <span class="text-gradient-claude">큐레이션</span>
-        </h1>
-        <p class="text-gray-500 dark:text-gray-400 text-lg">
-          NLP, ML 분야의 최신 논문과 뉴스를 한눈에
-        </p>
+      <div class="flex items-start gap-4">
+        <img src={`${import.meta.env.BASE_URL}logo.png`} alt="chanmuzi" class="w-16 h-16 md:w-20 md:h-20 rounded-2xl object-cover shadow-md flex-shrink-0" />
+        <div>
+          <h1 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-1 leading-tight">
+            chanmuzi의
+            <span class="text-gradient-claude">AI 큐레이션</span>
+          </h1>
+          <p class="text-gray-500 dark:text-gray-400 text-base">
+            AI 논문 & 뉴스를 매주 정리합니다
+          </p>
+        </div>
       </div>
       <div class="flex gap-2">
         <a href={`${import.meta.env.BASE_URL}search/`} class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:border-claude-400 hover:text-claude-500 transition-all">
