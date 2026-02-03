@@ -6,4 +6,5 @@ export default defineConfig({
   base: '/temp-news-moltbot',
   integrations: [tailwind()],
   output: 'static',
+  trailingSlash: 'always',
 });

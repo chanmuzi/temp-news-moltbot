@@ -25,99 +25,93 @@ const typeInfo: Record<string, { icon: string; label: string; color: string; bgL
   paper: {
     icon: '📜',
     label: 'Paper',
-    color: 'text-blue-700 dark:text-blue-300',
-    bgLight: 'bg-blue-50 border-blue-100',
-    bgDark: 'dark:bg-blue-950/20 dark:border-blue-900/30',
+    color: 'text-blue-800 dark:text-blue-300',
+    bgLight: 'bg-white border-blue-200/60 shadow-card',
+    bgDark: 'dark:bg-anthro-darkSurface dark:border-blue-800/40 dark:shadow-card-dark',
     accent: 'bg-blue-500',
   },
   dev: {
     icon: '🧑🏻‍💻',
     label: 'Dev',
-    color: 'text-emerald-700 dark:text-emerald-300',
-    bgLight: 'bg-emerald-50 border-emerald-100',
-    bgDark: 'dark:bg-emerald-950/20 dark:border-emerald-900/30',
+    color: 'text-emerald-800 dark:text-emerald-300',
+    bgLight: 'bg-white border-emerald-200/60 shadow-card',
+    bgDark: 'dark:bg-anthro-darkSurface dark:border-emerald-800/40 dark:shadow-card-dark',
     accent: 'bg-emerald-500',
   },
   news: {
     icon: '🗞️',
     label: 'News',
-    color: 'text-violet-700 dark:text-violet-300',
-    bgLight: 'bg-violet-50 border-violet-100',
-    bgDark: 'dark:bg-violet-950/20 dark:border-violet-900/30',
+    color: 'text-violet-800 dark:text-violet-300',
+    bgLight: 'bg-white border-violet-200/60 shadow-card',
+    bgDark: 'dark:bg-anthro-darkSurface dark:border-violet-800/40 dark:shadow-card-dark',
     accent: 'bg-violet-500',
   },
 };
 
 const info = typeInfo[type] || typeInfo.paper;
-const weekDisplay = week ? `W${week}` : '';
-const dateDisplay = showWeek && year && month ? `${year}.${String(month).padStart(2, '0')} ${weekDisplay}` : '';
+const weekLabel = week ? `${week}주차` : '';
+const dateDisplay = showWeek && year && month ? `${year}.${String(month).padStart(2, '0')} ${weekLabel}` : '';
 const hasMoreBullets = bullets.length > 3;
 ---
 
 <article
-  class={`item-card group relative rounded-xl border transition-all duration-200 hover:shadow-card-hover dark:hover:shadow-card-dark-hover ${info.bgLight} ${info.bgDark}`}
+  class={`item-card group relative rounded-xl border transition-all duration-200 hover:shadow-card-hover dark:hover:shadow-card-dark-hover hover:-translate-y-0.5 ${info.bgLight} ${info.bgDark}`}
   data-type={type}
   data-org={org.toLowerCase()}
   data-title={title.toLowerCase()}
   data-id={id}
 >
-  <!-- Left accent bar -->
   <div class={`absolute top-0 left-0 w-1 h-full rounded-l-xl ${info.accent}`}></div>
 
-  <div class="pl-4 pr-4 py-4">
-    <!-- Header row -->
-    <div class="flex items-center justify-between gap-2 mb-2.5">
+  <div class="pl-5 pr-4 py-4">
+    <div class="flex items-center justify-between gap-2 mb-2">
       <div class="flex items-center gap-2 min-w-0">
-        <span class={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold ${info.color} bg-white/60 dark:bg-white/5`}>
+        <span class={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold ${info.color} bg-gray-50 dark:bg-white/5`}>
           {info.icon} {info.label}
         </span>
-        <span class="text-sm font-medium text-sand-600 dark:text-sand-400 truncate">
+        <span class="text-sm font-semibold text-gray-600 dark:text-gray-400 truncate">
           {org}
         </span>
       </div>
-      <div class="flex items-center gap-1 flex-shrink-0">
-        {dateDisplay && (
-          <span class="text-xs text-sand-400 dark:text-sand-600 font-mono">
-            {dateDisplay}
-          </span>
-        )}
-      </div>
+      {dateDisplay && (
+        <span class="text-xs text-gray-400 dark:text-gray-500 font-mono flex-shrink-0">
+          {dateDisplay}
+        </span>
+      )}
     </div>
 
-    <!-- Title -->
     {url ? (
       <a
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        class="block text-[15px] font-semibold text-sand-800 dark:text-sand-100 hover:text-claude-600 dark:hover:text-claude-400 transition-colors mb-2.5 leading-snug"
+        class="block text-[15px] font-bold text-gray-900 dark:text-gray-100 hover:text-claude-600 dark:hover:text-claude-400 transition-colors mb-2 leading-snug"
       >
         {title}
-        <svg class="inline-block w-3.5 h-3.5 ml-1 opacity-0 group-hover:opacity-60 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+        <svg class="inline-block w-3.5 h-3.5 ml-1 opacity-0 group-hover:opacity-50 transition-opacity -translate-y-px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
       </a>
     ) : (
-      <h3 class="text-[15px] font-semibold text-sand-800 dark:text-sand-100 mb-2.5 leading-snug">
+      <h3 class="text-[15px] font-bold text-gray-900 dark:text-gray-100 mb-2 leading-snug">
         {title}
       </h3>
     )}
 
-    <!-- Bullets -->
     {bullets.length > 0 && (
       <div class="bullets-container">
-        <ul class="space-y-1.5 text-sm text-sand-600 dark:text-sand-400 leading-relaxed">
+        <ul class="space-y-1 text-[13px] leading-relaxed">
           {bullets.slice(0, 3).map((bullet) => (
-            <li class={`flex items-start gap-2 ${bullet.level > 1 ? 'ml-3 text-xs text-sand-500 dark:text-sand-500' : ''}`}>
-              <span class={`mt-[7px] w-1 h-1 rounded-full flex-shrink-0 ${bullet.level > 1 ? 'bg-sand-400 dark:bg-sand-600' : info.accent}`}></span>
+            <li class={`flex items-start gap-2 ${bullet.level > 1 ? 'ml-4 text-gray-500 dark:text-gray-500' : 'text-gray-700 dark:text-gray-300'}`}>
+              <span class={`mt-[7px] w-1 h-1 rounded-full flex-shrink-0 ${bullet.level > 1 ? 'bg-gray-400 dark:bg-gray-600' : info.accent}`}></span>
               <span>{bullet.text}</span>
             </li>
           ))}
         </ul>
         {hasMoreBullets && (
           <div class="bullets-extra hidden">
-            <ul class="space-y-1.5 text-sm text-sand-600 dark:text-sand-400 leading-relaxed mt-1.5">
+            <ul class="space-y-1 text-[13px] leading-relaxed mt-1">
               {bullets.slice(3).map((bullet) => (
-                <li class={`flex items-start gap-2 ${bullet.level > 1 ? 'ml-3 text-xs text-sand-500 dark:text-sand-500' : ''}`}>
-                  <span class={`mt-[7px] w-1 h-1 rounded-full flex-shrink-0 ${bullet.level > 1 ? 'bg-sand-400 dark:bg-sand-600' : info.accent}`}></span>
+                <li class={`flex items-start gap-2 ${bullet.level > 1 ? 'ml-4 text-gray-500 dark:text-gray-500' : 'text-gray-700 dark:text-gray-300'}`}>
+                  <span class={`mt-[7px] w-1 h-1 rounded-full flex-shrink-0 ${bullet.level > 1 ? 'bg-gray-400 dark:bg-gray-600' : info.accent}`}></span>
                   <span>{bullet.text}</span>
                 </li>
               ))}
@@ -127,12 +121,11 @@ const hasMoreBullets = bullets.length > 3;
       </div>
     )}
 
-    <!-- Action bar -->
-    <div class="flex items-center justify-between mt-3 pt-2.5 border-t border-sand-200/50 dark:border-sand-800/30">
-      <div class="flex items-center gap-1">
+    <div class="flex items-center justify-between mt-2.5 pt-2 border-t border-gray-100 dark:border-gray-800/50">
+      <div>
         {hasMoreBullets && (
           <button
-            class="expand-btn text-xs text-sand-400 hover:text-claude-500 dark:text-sand-500 dark:hover:text-claude-400 transition-colors px-1.5 py-0.5 rounded"
+            class="expand-btn text-xs font-medium text-claude-600 hover:text-claude-700 dark:text-claude-400 dark:hover:text-claude-300 transition-colors"
             data-id={id}
           >
             +{bullets.length - 3}개 더 보기
@@ -140,18 +133,16 @@ const hasMoreBullets = bullets.length > 3;
         )}
       </div>
       <div class="flex items-center gap-0.5">
-        <!-- Bookmark button -->
         <button
-          class="bookmark-btn p-1.5 rounded-md text-sand-300 hover:text-claude-500 dark:text-sand-600 dark:hover:text-claude-400 transition-colors"
+          class="bookmark-btn p-1.5 rounded-md text-gray-300 hover:text-claude-500 dark:text-gray-600 dark:hover:text-claude-400 transition-colors"
           data-id={id}
           title="북마크"
         >
           <svg class="w-4 h-4 bookmark-icon-empty" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
           <svg class="w-4 h-4 bookmark-icon-filled hidden" fill="currentColor" viewBox="0 0 24 24"><path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
         </button>
-        <!-- Share button -->
         <button
-          class="share-btn p-1.5 rounded-md text-sand-300 hover:text-claude-500 dark:text-sand-600 dark:hover:text-claude-400 transition-colors"
+          class="share-btn p-1.5 rounded-md text-gray-300 hover:text-claude-500 dark:text-gray-600 dark:hover:text-claude-400 transition-colors"
           data-title={title}
           data-url={url}
           data-org={org}
@@ -161,43 +152,23 @@ const hasMoreBullets = bullets.length > 3;
         </button>
       </div>
     </div>
-
-    <!-- Tags -->
-    {tags.length > 0 && (
-      <div class="flex flex-wrap gap-1.5 mt-2">
-        {tags.map((tag) => (
-          <span class="text-xs px-2 py-0.5 bg-sand-100 dark:bg-sand-800 text-sand-500 dark:text-sand-500 rounded-md">
-            #{tag}
-          </span>
-        ))}
-      </div>
-    )}
   </div>
 </article>
 
 <script>
-  // Expand/collapse bullets
   document.querySelectorAll('.expand-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       const card = btn.closest('.item-card');
       const extra = card?.querySelector('.bullets-extra');
       if (!extra) return;
-
       const isHidden = extra.classList.contains('hidden');
       extra.classList.toggle('hidden');
       btn.textContent = isHidden ? '접기' : `+${extra.querySelectorAll('li').length}개 더 보기`;
     });
   });
 
-  // Bookmark functionality (localStorage)
   function getBookmarks(): string[] {
-    try {
-      return JSON.parse(localStorage.getItem('bookmarks') || '[]');
-    } catch { return []; }
-  }
-
-  function saveBookmarks(ids: string[]) {
-    localStorage.setItem('bookmarks', JSON.stringify(ids));
+    try { return JSON.parse(localStorage.getItem('bookmarks') || '[]'); } catch { return []; }
   }
 
   function updateBookmarkUI(btn: Element, isBookmarked: boolean) {
@@ -207,67 +178,55 @@ const hasMoreBullets = bullets.length > 3;
       empty?.classList.add('hidden');
       filled?.classList.remove('hidden');
       btn.classList.add('text-claude-500', 'dark:text-claude-400');
-      btn.classList.remove('text-sand-300', 'dark:text-sand-600');
+      btn.classList.remove('text-gray-300', 'dark:text-gray-600');
     } else {
       empty?.classList.remove('hidden');
       filled?.classList.add('hidden');
       btn.classList.remove('text-claude-500', 'dark:text-claude-400');
-      btn.classList.add('text-sand-300', 'dark:text-sand-600');
+      btn.classList.add('text-gray-300', 'dark:text-gray-600');
     }
   }
 
-  // Initialize bookmarks
   const bookmarks = getBookmarks();
   document.querySelectorAll('.bookmark-btn').forEach((btn) => {
     const id = (btn as HTMLElement).dataset.id || '';
-    if (bookmarks.includes(id)) {
-      updateBookmarkUI(btn, true);
-    }
+    if (bookmarks.includes(id)) updateBookmarkUI(btn, true);
 
     btn.addEventListener('click', () => {
-      const currentBookmarks = getBookmarks();
+      const cur = getBookmarks();
       const itemId = (btn as HTMLElement).dataset.id || '';
-      const idx = currentBookmarks.indexOf(itemId);
-
+      const idx = cur.indexOf(itemId);
       if (idx >= 0) {
-        currentBookmarks.splice(idx, 1);
+        cur.splice(idx, 1);
         updateBookmarkUI(btn, false);
         showToast('북마크에서 제거되었습니다');
       } else {
-        currentBookmarks.push(itemId);
+        cur.push(itemId);
         updateBookmarkUI(btn, true);
         showToast('북마크에 추가되었습니다');
       }
-      saveBookmarks(currentBookmarks);
+      localStorage.setItem('bookmarks', JSON.stringify(cur));
     });
   });
 
-  // Share functionality
   document.querySelectorAll('.share-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       const el = btn as HTMLElement;
       const title = el.dataset.title || '';
       const url = el.dataset.url || '';
       const org = el.dataset.org || '';
-
       const text = `${title} (${org})`;
-
       if (navigator.share) {
         navigator.share({ title: text, url }).catch(() => {});
       } else {
-        // Fallback: copy to clipboard
-        navigator.clipboard.writeText(`${text}\n${url}`).then(() => {
-          showToast('클립보드에 복사되었습니다');
-        });
+        navigator.clipboard.writeText(`${text}\n${url}`).then(() => showToast('클립보드에 복사되었습니다'));
       }
     });
   });
 
-  // Toast helper
   function showToast(message: string) {
     const existing = document.querySelector('.toast');
     if (existing) existing.remove();
-
     const toast = document.createElement('div');
     toast.className = 'toast';
     toast.textContent = message;

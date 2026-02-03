@@ -87,20 +87,20 @@ const MONTHS_PER_PAGE = 3;
   <section class="mb-10">
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
       <div>
-        <h1 class="text-3xl md:text-4xl font-bold text-sand-800 dark:text-sand-100 mb-2 leading-tight">
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2 leading-tight">
           AI 논문 & 뉴스
           <span class="text-gradient-claude">큐레이션</span>
         </h1>
-        <p class="text-sand-500 dark:text-sand-500 text-lg">
+        <p class="text-gray-500 dark:text-gray-400 text-lg">
           NLP, ML 분야의 최신 논문과 뉴스를 한눈에
         </p>
       </div>
       <div class="flex gap-2">
-        <a href={`${import.meta.env.BASE_URL}search`} class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-sand-200 dark:border-sand-700 text-sm font-medium text-sand-600 dark:text-sand-400 hover:border-claude-400 hover:text-claude-500 transition-all">
+        <a href={`${import.meta.env.BASE_URL}search/`} class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:border-claude-400 hover:text-claude-500 transition-all">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
           상세 검색
         </a>
-        <a href={`${import.meta.env.BASE_URL}admin`} class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-claude-500 text-white text-sm font-medium hover:bg-claude-600 transition-all shadow-sm">
+        <a href={`${import.meta.env.BASE_URL}admin/`} class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-claude-500 text-white text-sm font-medium hover:bg-claude-600 transition-all shadow-sm">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
           추가
         </a>
@@ -109,21 +109,21 @@ const MONTHS_PER_PAGE = 3;
 
     <!-- Stats strip -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-      <div class="bg-white dark:bg-anthro-darkSurface rounded-xl border border-sand-200 dark:border-sand-800 px-4 py-3">
-        <div class="text-2xl font-bold text-sand-800 dark:text-sand-100">{itemsData.total_items.toLocaleString()}</div>
-        <div class="text-xs text-sand-400 dark:text-sand-600 mt-0.5">전체 항목</div>
+      <div class="bg-white dark:bg-anthro-darkSurface rounded-xl border border-gray-200 dark:border-gray-800 px-4 py-3">
+        <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">{itemsData.total_items.toLocaleString()}</div>
+        <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">전체 항목</div>
       </div>
-      <div class="bg-white dark:bg-anthro-darkSurface rounded-xl border border-sand-200 dark:border-sand-800 px-4 py-3">
+      <div class="bg-white dark:bg-anthro-darkSurface rounded-xl border border-gray-200 dark:border-gray-800 px-4 py-3">
         <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">{stats.paper.toLocaleString()}</div>
-        <div class="text-xs text-sand-400 dark:text-sand-600 mt-0.5">📜 Papers</div>
+        <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">📜 Papers</div>
       </div>
-      <div class="bg-white dark:bg-anthro-darkSurface rounded-xl border border-sand-200 dark:border-sand-800 px-4 py-3">
+      <div class="bg-white dark:bg-anthro-darkSurface rounded-xl border border-gray-200 dark:border-gray-800 px-4 py-3">
         <div class="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{stats.dev.toLocaleString()}</div>
-        <div class="text-xs text-sand-400 dark:text-sand-600 mt-0.5">🧑🏻‍💻 Dev</div>
+        <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">🧑🏻‍💻 Dev</div>
       </div>
-      <div class="bg-white dark:bg-anthro-darkSurface rounded-xl border border-sand-200 dark:border-sand-800 px-4 py-3">
+      <div class="bg-white dark:bg-anthro-darkSurface rounded-xl border border-gray-200 dark:border-gray-800 px-4 py-3">
         <div class="text-2xl font-bold text-violet-600 dark:text-violet-400">{stats.news.toLocaleString()}</div>
-        <div class="text-xs text-sand-400 dark:text-sand-600 mt-0.5">🗞️ News</div>
+        <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">🗞️ News</div>
       </div>
     </div>
   </section>
@@ -131,16 +131,16 @@ const MONTHS_PER_PAGE = 3;
   <!-- Top Orgs -->
   <section class="mb-10">
     <div class="flex items-center gap-2 mb-3">
-      <h2 class="text-sm font-semibold text-sand-500 dark:text-sand-500 uppercase tracking-wider">Top 기관</h2>
+      <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Top 기관</h2>
     </div>
     <div class="flex flex-wrap gap-2">
       {topOrgs.map(([name, count]) => (
         <a
-          href={`${import.meta.env.BASE_URL}search`}
-          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-anthro-darkSurface border border-sand-200 dark:border-sand-800 text-sm text-sand-600 dark:text-sand-400 hover:border-claude-400 hover:text-claude-500 transition-all"
+          href={`${import.meta.env.BASE_URL}search/?org=${encodeURIComponent(name)}`}
+          class="org-chip inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-anthro-darkSurface border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:border-claude-400 hover:text-claude-600 dark:hover:text-claude-400 hover:shadow-sm transition-all cursor-pointer"
         >
           {name}
-          <span class="text-xs text-sand-400 dark:text-sand-600">({count})</span>
+          <span class="text-xs text-gray-400 dark:text-gray-500 font-normal">({count})</span>
         </a>
       ))}
     </div>
@@ -149,14 +149,14 @@ const MONTHS_PER_PAGE = 3;
   <!-- Quick Search -->
   <section class="mb-10">
     <div class="relative max-w-xl">
-      <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-sand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
       <input
         type="text"
         id="quick-search"
         placeholder="빠른 검색..."
-        class="w-full pl-12 pr-4 py-3 rounded-xl border border-sand-200 dark:border-sand-700 bg-white dark:bg-anthro-darkSurface text-sand-800 dark:text-sand-100 placeholder-sand-400 dark:placeholder-sand-600 focus:border-claude-500 outline-none transition-all"
+        class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-anthro-darkSurface text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:border-claude-500 outline-none transition-all shadow-sm"
       />
-      <span id="search-count" class="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-sand-400 font-mono hidden"></span>
+      <span id="search-count" class="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-gray-500 font-mono hidden"></span>
     </div>
   </section>
 
@@ -166,45 +166,51 @@ const MONTHS_PER_PAGE = 3;
       <button data-filter="all" class="filter-btn active px-3 py-1.5 rounded-lg text-sm font-medium transition-all bg-claude-500 text-white">
         전체
       </button>
-      <button data-filter="paper" class="filter-btn px-3 py-1.5 rounded-lg text-sm font-medium transition-all text-sand-500 dark:text-sand-400 hover:bg-sand-100 dark:hover:bg-sand-800">
+      <button data-filter="paper" class="filter-btn px-3 py-1.5 rounded-lg text-sm font-medium transition-all text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800">
         📜 Paper
       </button>
-      <button data-filter="dev" class="filter-btn px-3 py-1.5 rounded-lg text-sm font-medium transition-all text-sand-500 dark:text-sand-400 hover:bg-sand-100 dark:hover:bg-sand-800">
+      <button data-filter="dev" class="filter-btn px-3 py-1.5 rounded-lg text-sm font-medium transition-all text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800">
         🧑🏻‍💻 Dev
       </button>
-      <button data-filter="news" class="filter-btn px-3 py-1.5 rounded-lg text-sm font-medium transition-all text-sand-500 dark:text-sand-400 hover:bg-sand-100 dark:hover:bg-sand-800">
+      <button data-filter="news" class="filter-btn px-3 py-1.5 rounded-lg text-sm font-medium transition-all text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800">
         🗞️ News
       </button>
     </div>
   </section>
 
   <!-- Latest Section -->
-  <section id="latest" class="mb-12">
-    <div class="flex items-center gap-3 mb-4">
-      <h2 class="text-lg font-bold text-sand-800 dark:text-sand-100">최신 항목</h2>
-      <span class="text-xs text-sand-400 dark:text-sand-600 bg-sand-100 dark:bg-sand-800 px-2 py-0.5 rounded-md font-mono">
-        최근 2주 · {latestItems.length}건
-      </span>
-    </div>
-    <div class="grid gap-3 md:grid-cols-2" id="latest-grid">
-      {latestItems.slice(0, 12).map((item) => (
-        <ItemCard {...item} showWeek={true} />
-      ))}
-    </div>
-    {latestItems.length > 12 && (
-      <div class="text-center mt-4">
-        <button id="show-more-latest" class="text-sm text-sand-400 hover:text-claude-500 transition-colors">
-          +{latestItems.length - 12}건 더 보기
-        </button>
+  <section id="latest" class="mb-12 relative">
+    <div class="absolute -left-4 top-0 bottom-0 w-1 rounded-full bg-gradient-to-b from-claude-400 to-claude-600 hidden md:block"></div>
+    <div class="bg-gradient-to-r from-claude-50/50 to-transparent dark:from-claude-900/10 dark:to-transparent rounded-2xl p-6 -mx-2 border border-claude-100/50 dark:border-claude-900/20">
+      <div class="flex items-center gap-3 mb-5">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-claude-500 animate-pulse"></span>
+          <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">최신 항목</h2>
+        </div>
+        <span class="text-xs text-claude-600 dark:text-claude-400 bg-claude-100/60 dark:bg-claude-900/30 px-2.5 py-0.5 rounded-full font-semibold">
+          최근 2주 · {latestItems.length}건
+        </span>
       </div>
-    )}
+      <div class="grid gap-3 md:grid-cols-2" id="latest-grid">
+        {latestItems.slice(0, 12).map((item) => (
+          <ItemCard {...item} showWeek={true} />
+        ))}
+      </div>
+      {latestItems.length > 12 && (
+        <div class="text-center mt-5">
+          <button id="show-more-latest" class="text-sm font-medium text-claude-600 dark:text-claude-400 hover:text-claude-700 dark:hover:text-claude-300 transition-colors">
+            +{latestItems.length - 12}건 더 보기 →
+          </button>
+        </div>
+      )}
+    </div>
   </section>
 
   <!-- All Items with Month Groups -->
   <section id="all-items">
     <div class="flex items-center justify-between mb-4">
-      <h2 class="text-lg font-bold text-sand-800 dark:text-sand-100">전체 아카이브</h2>
-      <span class="text-xs text-sand-400 dark:text-sand-600 font-mono">{sortedItems.length.toLocaleString()}건</span>
+      <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">전체 아카이브</h2>
+      <span class="text-xs text-gray-400 dark:text-gray-500 font-mono">{sortedItems.length.toLocaleString()}건</span>
     </div>
 
     <div id="items-container">
@@ -215,9 +221,9 @@ const MONTHS_PER_PAGE = 3;
           data-month={group.month}
           data-page={Math.floor(groupIndex / MONTHS_PER_PAGE)}
         >
-          <h3 class="flex items-center gap-2 text-sm font-semibold text-sand-500 dark:text-sand-500 mb-3 sticky top-14 bg-anthro-bg/95 dark:bg-anthro-dark/95 backdrop-blur-sm py-2 z-10 border-b border-sand-200/50 dark:border-sand-800/50 uppercase tracking-wider">
+          <h3 class="flex items-center gap-2 text-sm font-semibold text-gray-500 dark:text-gray-400 mb-3 sticky top-14 bg-anthro-bg/95 dark:bg-anthro-dark/95 backdrop-blur-sm py-2 z-10 border-b border-gray-200/50 dark:border-gray-800/50 uppercase tracking-wider">
             {group.year}년 {monthNames[group.month] || group.month}
-            <span class="text-xs font-normal text-sand-400 dark:text-sand-600 bg-sand-100 dark:bg-sand-800 px-1.5 py-0.5 rounded normal-case tracking-normal">
+            <span class="text-xs font-normal text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded normal-case tracking-normal">
               {group.items.length}건
             </span>
           </h3>
@@ -232,11 +238,11 @@ const MONTHS_PER_PAGE = 3;
 
     <!-- Pagination -->
     <div id="pagination" class="flex justify-center items-center gap-3 mt-8 mb-12">
-      <button id="prev-page" class="px-4 py-2 rounded-lg border border-sand-200 dark:border-sand-700 text-sm font-medium text-sand-600 dark:text-sand-400 disabled:opacity-30 disabled:cursor-not-allowed hover:border-claude-400 hover:text-claude-500 transition-all">
+      <button id="prev-page" class="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed hover:border-claude-400 hover:text-claude-500 transition-all">
         ← 이전
       </button>
-      <span id="page-info" class="text-sm text-sand-400 dark:text-sand-600 font-mono"></span>
-      <button id="next-page" class="px-4 py-2 rounded-lg border border-sand-200 dark:border-sand-700 text-sm font-medium text-sand-600 dark:text-sand-400 disabled:opacity-30 disabled:cursor-not-allowed hover:border-claude-400 hover:text-claude-500 transition-all">
+      <span id="page-info" class="text-sm text-gray-400 dark:text-gray-500 font-mono"></span>
+      <button id="next-page" class="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed hover:border-claude-400 hover:text-claude-500 transition-all">
         다음 →
       </button>
     </div>
@@ -321,10 +327,10 @@ const MONTHS_PER_PAGE = 3;
       // Update active states
       filterBtns.forEach((b) => {
         b.classList.remove('bg-claude-500', 'text-white');
-        b.classList.add('text-sand-500', 'dark:text-sand-400');
+        b.classList.add('text-gray-600', 'dark:text-gray-400');
       });
       btn.classList.add('bg-claude-500', 'text-white');
-      btn.classList.remove('text-sand-500', 'dark:text-sand-400');
+      btn.classList.remove('text-gray-600', 'dark:text-gray-400');
 
       // Also filter latest section
       const latestCards = document.querySelectorAll('#latest-grid .item-card');
@@ -343,11 +349,38 @@ const MONTHS_PER_PAGE = 3;
   const latestSection = document.getElementById('latest');
   const paginationEl = document.getElementById('pagination');
 
+  // Store original HTML for highlight reset
+  const originalCardHTML = new Map<Element, Map<Element, string>>();
+  cards.forEach((card) => {
+    const textEls = card.querySelectorAll('a, h3, .bullets-container span');
+    const map = new Map<Element, string>();
+    textEls.forEach(el => map.set(el, el.innerHTML));
+    originalCardHTML.set(card, map);
+  });
+
+  function highlightInCard(card: Element, query: string) {
+    const origMap = originalCardHTML.get(card);
+    if (!origMap) return;
+    origMap.forEach((origHTML, el) => {
+      if (!query) {
+        el.innerHTML = origHTML;
+        return;
+      }
+      const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`(${escapedQuery})`, 'gi');
+      el.innerHTML = origHTML.replace(regex, '<mark class="search-highlight">$1</mark>');
+    });
+  }
+
   searchInput?.addEventListener('input', () => {
-    const query = searchInput.value.toLowerCase().trim();
+    const query = searchInput.value.trim();
+    const lowerQuery = query.toLowerCase();
 
     if (!query) {
-      cards.forEach(card => (card as HTMLElement).style.display = '');
+      cards.forEach(card => {
+        (card as HTMLElement).style.display = '';
+        highlightInCard(card, '');
+      });
       searchCount?.classList.add('hidden');
       if (latestSection) latestSection.style.display = '';
       if (paginationEl) paginationEl.style.display = '';
@@ -366,8 +399,9 @@ const MONTHS_PER_PAGE = 3;
     let visibleCount = 0;
     cards.forEach((card) => {
       const text = (card.textContent || '').toLowerCase();
-      const matches = text.includes(query);
+      const matches = text.includes(lowerQuery);
       (card as HTMLElement).style.display = matches ? '' : 'none';
+      highlightInCard(card, matches ? query : '');
       if (matches) visibleCount++;
     });
 
