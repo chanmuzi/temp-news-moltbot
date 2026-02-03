@@ -71,16 +71,16 @@ const currentWeek = Math.ceil((now.getDate() + firstDay) / 7).toString();
 
     <!-- Mode Tabs -->
     <div class="flex mb-5 bg-gray-100 dark:bg-anthro-darkMid rounded-lg p-0.5">
-      <button id="tab-simple" class="tab-btn flex-1 py-2 rounded-md text-sm font-semibold transition-all bg-white dark:bg-anthro-darkSurface text-gray-900 dark:text-gray-100 shadow-sm">
+      <button id="tab-simple" class="tab-btn flex-1 py-2 rounded-md text-sm font-semibold transition-all text-gray-500 dark:text-gray-400">
         간편 추가
       </button>
-      <button id="tab-markdown" class="tab-btn flex-1 py-2 rounded-md text-sm font-semibold transition-all text-gray-500 dark:text-gray-400">
+      <button id="tab-markdown" class="tab-btn flex-1 py-2 rounded-md text-sm font-semibold transition-all bg-white dark:bg-anthro-darkSurface text-gray-900 dark:text-gray-100 shadow-sm">
         마크다운 붙여넣기
       </button>
     </div>
 
     <!-- Simple Mode -->
-    <div id="panel-simple" class="bg-white dark:bg-anthro-darkSurface rounded-xl border border-gray-200 dark:border-gray-800 p-5 mb-5">
+    <div id="panel-simple" class="hidden bg-white dark:bg-anthro-darkSurface rounded-xl border border-gray-200 dark:border-gray-800 p-5 mb-5">
       <!-- Type Selector -->
       <div class="mb-4">
         <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">유형</label>
@@ -136,7 +136,7 @@ const currentWeek = Math.ceil((now.getDate() + firstDay) / 7).toString();
     </div>
 
     <!-- Markdown Mode -->
-    <div id="panel-markdown" class="hidden bg-white dark:bg-anthro-darkSurface rounded-xl border border-gray-200 dark:border-gray-800 p-5 mb-5">
+    <div id="panel-markdown" class="bg-white dark:bg-anthro-darkSurface rounded-xl border border-gray-200 dark:border-gray-800 p-5 mb-5">
       <div class="flex items-center justify-between mb-3">
         <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider">마크다운 입력</label>
         <span class="text-xs text-gray-400">이모지 없이 붙여넣어도 됩니다</span>
@@ -472,9 +472,23 @@ const currentWeek = Math.ceil((now.getDate() + firstDay) / 7).toString();
     }
 
     if (result.items.length > 0) {
-      parsedItems = [...parsedItems, ...result.items];
-      renderPreview();
-      showToast(`${result.items.length}개 항목이 파싱되었습니다`);
+      // Deduplicate: skip items that already exist in preview
+      const existingIds = new Set(parsedItems.map(i => i.id));
+      const newItems = result.items.filter(i => !existingIds.has(i.id));
+      const duplicateCount = result.items.length - newItems.length;
+
+      if (newItems.length > 0) {
+        parsedItems = [...parsedItems, ...newItems];
+        renderPreview();
+      }
+
+      if (duplicateCount > 0 && newItems.length > 0) {
+        showToast(`${newItems.length}개 추가, ${duplicateCount}개 중복 건너뜀`);
+      } else if (duplicateCount > 0 && newItems.length === 0) {
+        showToast('이미 추가된 항목입니다 (중복)');
+      } else {
+        showToast(`${newItems.length}개 항목이 파싱되었습니다`);
+      }
     }
   });
 
@@ -575,16 +589,33 @@ const currentWeek = Math.ceil((now.getDate() + firstDay) / 7).toString();
 
       const fileData = await getRes.json();
 
-      // Decode base64 content (handle large files)
+      // Decode file content - use Blobs API for large files (>1MB)
       let rawContent: string;
       try {
-        const binaryStr = atob(fileData.content.replace(/\n/g, ''));
+        let base64Content: string;
+        if (fileData.content) {
+          // Small file: content available directly from Contents API
+          base64Content = fileData.content.replace(/\n/g, '');
+        } else {
+          // Large file (>1MB): Contents API omits content, use Git Blobs API
+          showStatus('파일이 큽니다. Blob API로 읽는 중...', 'info');
+          const blobRes = await fetch(`https://api.github.com/repos/${repo}/git/blobs/${fileData.sha}`, {
+            headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+          });
+          if (!blobRes.ok) {
+            throw new Error(`Blob API 오류 (${blobRes.status}): 파일을 읽을 수 없습니다.`);
+          }
+          const blobData = await blobRes.json();
+          base64Content = blobData.content.replace(/\n/g, '');
+        }
+        const binaryStr = atob(base64Content);
         const bytes = new Uint8Array(binaryStr.length);
         for (let i = 0; i < binaryStr.length; i++) {
           bytes[i] = binaryStr.charCodeAt(i);
         }
         rawContent = new TextDecoder('utf-8').decode(bytes);
-      } catch (e) {
+      } catch (e: any) {
+        if (e.message.includes('Blob API')) throw e;
         throw new Error('items.json 디코딩 실패. 파일이 너무 크거나 형식이 올바르지 않을 수 있습니다.');
       }
 
@@ -624,13 +655,62 @@ const currentWeek = Math.ceil((now.getDate() + firstDay) / 7).toString();
       for (let i = 0; i < uint8.length; i++) {
         binary += String.fromCharCode(uint8[i]);
       }
-      const newContent = btoa(binary);
+      const newBase64 = btoa(binary);
 
       const titles = newItems.map((i: any) => i.title).slice(0, 3).join(', ');
       const commitMessage = `Add ${newItems.length} item(s): ${titles}`;
 
-      const putRes = await fetch(`https://api.github.com/repos/${repo}/contents/data/items.json`, {
-        method: 'PUT',
+      // Use Git Data API for reliable large file commits
+      // Step 1: Create a new blob with the updated content
+      const blobRes = await fetch(`https://api.github.com/repos/${repo}/git/blobs`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `token ${token}`,
+          'Accept': 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ content: newBase64, encoding: 'base64' }),
+      });
+      if (!blobRes.ok) {
+        const errData = await blobRes.json().catch(() => ({ message: blobRes.statusText }));
+        throw new Error(`Blob 생성 실패 (${blobRes.status}): ${errData.message}`);
+      }
+      const newBlob = await blobRes.json();
+
+      // Step 2: Get the current branch reference
+      const refRes = await fetch(`https://api.github.com/repos/${repo}/git/ref/heads/main`, {
+        headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+      });
+      if (!refRes.ok) throw new Error('브랜치 참조를 가져올 수 없습니다.');
+      const refData = await refRes.json();
+      const latestCommitSha = refData.object.sha;
+
+      // Step 3: Get the current commit's tree
+      const commitRes = await fetch(`https://api.github.com/repos/${repo}/git/commits/${latestCommitSha}`, {
+        headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+      });
+      if (!commitRes.ok) throw new Error('커밋 정보를 가져올 수 없습니다.');
+      const commitData = await commitRes.json();
+
+      // Step 4: Create a new tree with the updated file
+      const treeRes = await fetch(`https://api.github.com/repos/${repo}/git/trees`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `token ${token}`,
+          'Accept': 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          base_tree: commitData.tree.sha,
+          tree: [{ path: 'data/items.json', mode: '100644', type: 'blob', sha: newBlob.sha }],
+        }),
+      });
+      if (!treeRes.ok) throw new Error('트리 생성에 실패했습니다.');
+      const newTree = await treeRes.json();
+
+      // Step 5: Create a new commit
+      const newCommitRes = await fetch(`https://api.github.com/repos/${repo}/git/commits`, {
+        method: 'POST',
         headers: {
           'Authorization': `token ${token}`,
           'Accept': 'application/vnd.github.v3+json',
@@ -638,14 +718,26 @@ const currentWeek = Math.ceil((now.getDate() + firstDay) / 7).toString();
         },
         body: JSON.stringify({
           message: commitMessage,
-          content: newContent,
-          sha: fileData.sha,
+          tree: newTree.sha,
+          parents: [latestCommitSha],
         }),
       });
+      if (!newCommitRes.ok) throw new Error('커밋 생성에 실패했습니다.');
+      const newCommit = await newCommitRes.json();
 
-      if (!putRes.ok) {
-        const errData = await putRes.json().catch(() => ({ message: putRes.statusText }));
-        throw new Error(`커밋 실패 (${putRes.status}): ${errData.message}`);
+      // Step 6: Update the branch reference
+      const updateRefRes = await fetch(`https://api.github.com/repos/${repo}/git/refs/heads/main`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `token ${token}`,
+          'Accept': 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ sha: newCommit.sha }),
+      });
+      if (!updateRefRes.ok) {
+        const errData = await updateRefRes.json().catch(() => ({ message: updateRefRes.statusText }));
+        throw new Error(`브랜치 업데이트 실패 (${updateRefRes.status}): ${errData.message}`);
       }
 
       showStatus(`✓ ${newItems.length}개 항목이 성공적으로 추가되었습니다! GitHub Actions가 자동으로 사이트를 빌드합니다.`, 'success');
