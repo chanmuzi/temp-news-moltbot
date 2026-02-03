@@ -71,11 +71,11 @@ const currentWeek = Math.ceil((now.getDate() + firstDay) / 7).toString();
 
     <!-- Mode Tabs -->
     <div class="flex mb-5 bg-gray-100 dark:bg-anthro-darkMid rounded-lg p-0.5">
-      <button id="tab-simple" class="tab-btn flex-1 py-2 rounded-md text-sm font-semibold transition-all text-gray-500 dark:text-gray-400">
-        간편 추가
-      </button>
       <button id="tab-markdown" class="tab-btn flex-1 py-2 rounded-md text-sm font-semibold transition-all bg-white dark:bg-anthro-darkSurface text-gray-900 dark:text-gray-100 shadow-sm">
         마크다운 붙여넣기
+      </button>
+      <button id="tab-simple" class="tab-btn flex-1 py-2 rounded-md text-sm font-semibold transition-all text-gray-500 dark:text-gray-400">
+        간편 추가
       </button>
     </div>
 
@@ -515,6 +515,8 @@ const currentWeek = Math.ceil((now.getDate() + firstDay) / 7).toString();
     container.innerHTML = parsedItems.map((item, idx) => {
       const icon = TYPE_ICONS[item.type] || '📜';
       const colors = TYPE_COLORS[item.type] || TYPE_COLORS.paper;
+      const dateDisplay = `${item.year}.${String(item.month).padStart(2, '0')} ${item.week}주차`;
+      const urlDomain = item.url ? (() => { try { return new URL(item.url).hostname.replace('www.', ''); } catch { return ''; } })() : '';
       return `
         <div class="p-4 rounded-xl border ${colors.bg} ${colors.border}/30 relative group">
           <button class="remove-item absolute top-2 right-2 p-1 rounded-md text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all" data-idx="${idx}">
@@ -522,11 +524,14 @@ const currentWeek = Math.ceil((now.getDate() + firstDay) / 7).toString();
           </button>
           <div class="flex items-center gap-2 mb-2">
             <span class="text-xs font-bold ${colors.text}">${icon} ${item.type.toUpperCase()}</span>
-            <span class="text-sm font-semibold text-gray-600 dark:text-gray-400">${escapeHtml(item.org)}</span>
-            <span class="text-xs text-gray-400 font-mono ml-auto">${item.date}</span>
+            <span class="text-xs font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-white/10 px-2 py-0.5 rounded-md">${escapeHtml(item.org)}</span>
+            <span class="text-xs text-gray-400 font-mono ml-auto">${dateDisplay}</span>
           </div>
-          <h3 class="font-bold text-gray-900 dark:text-gray-100 mb-1.5">${escapeHtml(item.title)}</h3>
-          ${item.url ? `<a href="${item.url}" target="_blank" class="text-xs text-claude-500 hover:underline mb-2 block truncate">${escapeHtml(item.url)}</a>` : ''}
+          ${item.url
+            ? `<a href="${item.url}" target="_blank" class="block text-[15px] font-bold text-gray-900 dark:text-gray-100 hover:text-claude-600 dark:hover:text-claude-400 transition-colors mb-1.5 leading-snug">${escapeHtml(item.title)} <svg class="inline w-3.5 h-3.5 ml-0.5 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>`
+            : `<h3 class="text-[15px] font-bold text-gray-900 dark:text-gray-100 mb-1.5 leading-snug">${escapeHtml(item.title)}</h3>`
+          }
+          ${urlDomain ? `<span class="text-xs text-gray-400 mb-1 block">${urlDomain}</span>` : ''}
           ${item.bullets.length > 0 ? `
             <ul class="text-sm text-gray-700 dark:text-gray-300 space-y-1 mt-2">
               ${item.bullets.map((b: any) => `
@@ -628,9 +633,10 @@ const currentWeek = Math.ceil((now.getDate() + firstDay) / 7).toString();
 
       const existingIds = new Set(currentContent.items.map((i: any) => i.id));
       const newItems = items.filter(i => !existingIds.has(i.id));
+      const skippedCount = items.length - newItems.length;
 
       if (newItems.length === 0) {
-        showStatus('추가할 새 항목이 없습니다 (이미 존재하는 항목입니다).', 'warn');
+        showStatus(`추가할 새 항목이 없습니다. ${skippedCount}개 항목이 이미 존재합니다.`, 'warn');
         submitBtn.disabled = false;
         return;
       }
@@ -740,7 +746,8 @@ const currentWeek = Math.ceil((now.getDate() + firstDay) / 7).toString();
         throw new Error(`브랜치 업데이트 실패 (${updateRefRes.status}): ${errData.message}`);
       }
 
-      showStatus(`✓ ${newItems.length}개 항목이 성공적으로 추가되었습니다! GitHub Actions가 자동으로 사이트를 빌드합니다.`, 'success');
+      const skippedMsg = skippedCount > 0 ? ` (${skippedCount}개 중복 건너뜀)` : '';
+      showStatus(`✓ ${newItems.length}개 항목이 성공적으로 추가되었습니다!${skippedMsg} GitHub Actions가 자동으로 사이트를 빌드합니다.`, 'success');
       parsedItems = [];
       renderPreview();
     } catch (err: any) {
