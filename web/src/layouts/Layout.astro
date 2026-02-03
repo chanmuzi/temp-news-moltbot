@@ -4,7 +4,7 @@ interface Props {
   description?: string;
 }
 
-const { title, description = "AI, NLP, ML 분야의 최신 논문과 뉴스를 큐레이션합니다." } = Astro.props;
+const { title, description = "chanmuzi의 AI 논문 & 뉴스 큐레이션. NLP, ML 분야의 최신 논문과 뉴스를 매주 정리합니다." } = Astro.props;
 const base = import.meta.env.BASE_URL;
 ---
 
@@ -16,6 +16,7 @@ const base = import.meta.env.BASE_URL;
     <meta name="description" content={description} />
     <meta name="theme-color" content="#D97757" />
     <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
+    <link rel="apple-touch-icon" href={`${base}logo.png`} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -27,12 +28,15 @@ const base = import.meta.env.BASE_URL;
       <div class="max-w-6xl mx-auto px-4 sm:px-6">
         <div class="flex justify-between h-14 items-center">
           <a href={base} class="flex items-center gap-2.5 group">
-            <span class="w-8 h-8 rounded-lg bg-gradient-to-br from-claude-400 to-claude-600 flex items-center justify-center text-white text-sm font-black shadow-sm group-hover:shadow-md group-hover:scale-105 transition-all">
-              N
-            </span>
-            <span class="font-bold text-lg text-gray-800 dark:text-gray-100">
-              NLP Paper News
-            </span>
+            <img src={`${base}logo.png`} alt="chanmuzi" class="w-8 h-8 rounded-lg object-cover shadow-sm group-hover:shadow-md group-hover:scale-105 transition-all" />
+            <div class="flex flex-col leading-none">
+              <span class="font-bold text-[15px] text-gray-800 dark:text-gray-100">
+                chanmuzi
+              </span>
+              <span class="text-[10px] text-gray-400 dark:text-gray-500 tracking-wide">
+                AI Paper & News
+              </span>
+            </div>
           </a>
           <div class="flex items-center gap-1">
             <a
@@ -77,8 +81,8 @@ const base = import.meta.env.BASE_URL;
       <div class="max-w-6xl mx-auto px-4 sm:px-6 py-10">
         <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
           <div class="flex items-center gap-2.5">
-            <span class="w-6 h-6 rounded-md bg-gradient-to-br from-claude-400 to-claude-600 flex items-center justify-center text-white text-xs font-black">N</span>
-            <span class="text-sm font-semibold text-gray-500 dark:text-gray-400">NLP Paper News</span>
+            <img src={`${base}logo.png`} alt="chanmuzi" class="w-6 h-6 rounded-md object-cover" />
+            <span class="text-sm font-semibold text-gray-500 dark:text-gray-400">chanmuzi AI Paper & News</span>
           </div>
           <div class="flex items-center gap-4 text-xs text-gray-400 dark:text-gray-500">
             <a href="https://github.com/chanmuzi" class="hover:text-claude-500 transition-colors">GitHub</a>
